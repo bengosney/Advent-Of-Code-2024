@@ -52,12 +52,6 @@ format.docstring-code-format = true
 lint.select = [ "C90", "E", "F", "FURB", "I", "N", "PERF", "PL", "RUF", "TRY", "UP" ]
 lint.ignore = [ "PLR2004" ]
 
-lint.isort.section-order = [
-  "future",
-  "standard-library",
-  "local-folder",
-]
-
 [tool.pycln]
 all = true
 
