@@ -26,8 +26,8 @@ class DayType(str, Enum):
     # for day in sorted([p.name.replace(".py", "") for p in list(Path("./src").glob("day_*.py"))]):
     #    cog.outl(f'{day.upper()} = "{day}"')
     # ]]]
-    pass
-    # [[[end]]]
+    DAY_01 = "day_01"
+    # [[[end]]] (checksum: 6905f4a0b9709141cfc527c4af171f9b)
 
 
 class SortType(str, Enum):
