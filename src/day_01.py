@@ -1,40 +1,26 @@
-from collections import Counter
-
-# First Party
 from utils import no_input_skip, read_input
 
 
 def process_list(puzzle: str) -> tuple[list[int], list[int]]:
-    left = []
-    right = []
+    left, right = [], []
     for line in puzzle.splitlines():
-        parts = line.split(" ")
+        parts = line.split()
         left.append(int(parts[0]))
         right.append(int(parts[-1]))
 
-    left.sort()
-    right.sort()
-    return left, right
+    return sorted(left), sorted(right)
 
 
 def part_1(puzzle: str) -> int:
     left, right = process_list(puzzle)
-    total: int = 0
-    for i in range(len(left)):
-        total += max(left[i], right[i]) - min(left[i], right[i])
 
-    return total
+    return sum(abs(l - r) for l, r in zip(left, right))
 
 
 def part_2(puzzle: str) -> int:
     left, right = process_list(puzzle)
 
-    right_counts = Counter(right)
-    total: int = 0
-    for c in left:
-        total += c * right_counts[c]
-
-    return total
+    return sum(l * right.count(l) for l in left)
 
 
 # -- Tests
