@@ -1,8 +1,10 @@
+from collections import Counter
+
 # First Party
-from utils import read_input, no_input_skip  # noqa
+from utils import no_input_skip, read_input
 
 
-def part_1(puzzle: str) -> int:
+def process_list(puzzle: str) -> tuple[list[int], list[int]]:
     left = []
     right = []
     for line in puzzle.splitlines():
@@ -12,7 +14,12 @@ def part_1(puzzle: str) -> int:
 
     left.sort()
     right.sort()
-    total = 0
+    return left, right
+
+
+def part_1(puzzle: str) -> int:
+    left, right = process_list(puzzle)
+    total: int = 0
     for i in range(len(left)):
         total += max(left[i], right[i]) - min(left[i], right[i])
 
@@ -20,7 +27,14 @@ def part_1(puzzle: str) -> int:
 
 
 def part_2(puzzle: str) -> int:
-    pass
+    left, right = process_list(puzzle)
+
+    right_counts = Counter(right)
+    total: int = 0
+    for c in left:
+        total += c * right_counts[c]
+
+    return total
 
 
 # -- Tests
@@ -40,21 +54,21 @@ def test_part_1() -> None:
     assert part_1(test_input) == 11
 
 
-# def test_part_2() -> None:
-#     test_input = get_example_input()
-#     assert part_2(test_input) is not None
+def test_part_2() -> None:
+    test_input = get_example_input()
+    assert part_2(test_input) == 31
 
 
-# @no_input_skip
-# def test_part_1_real() -> None:
-#     real_input = read_input(__file__)
-#     assert part_1(real_input) is not None
+@no_input_skip
+def test_part_1_real() -> None:
+    real_input = read_input(__file__)
+    assert part_1(real_input) == 1651298
 
 
-# @no_input_skip
-# def test_part_2_real() -> None:
-#     real_input = read_input(__file__)
-#     assert part_2(real_input) is not None
+@no_input_skip
+def test_part_2_real() -> None:
+    real_input = read_input(__file__)
+    assert part_2(real_input) == 21306195
 
 
 # -- Main
