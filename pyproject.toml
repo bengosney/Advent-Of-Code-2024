@@ -50,7 +50,7 @@ format.quote-style = "double"
 format.docstring-code-format = true
 
 lint.select = [ "C90", "E", "F", "FURB", "I", "N", "PERF", "PL", "RUF", "TRY", "UP" ]
-lint.ignore = [ "PLR2004" ]
+lint.ignore = [ "E741", "PLR2004" ]
 
 [tool.pycln]
 all = true
