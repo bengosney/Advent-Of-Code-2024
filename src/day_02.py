@@ -20,7 +20,6 @@ def check_row(row: list[int]) -> bool:
 def part_1(puzzle: str) -> int:
     ok = 0
     for row in puzzle.splitlines():
-        print(row, check_row(list(map(int, row.split()))))
         if check_row(list(map(int, row.split()))):
             ok += 1
 
@@ -30,18 +29,18 @@ def part_1(puzzle: str) -> int:
 def part_2(puzzle: str) -> int:
     ok = 0
     for row in puzzle.splitlines():
-        print(row, check_row(list(map(int, row.split()))))
         values = list(map(int, row.split()))
         if check_row(values):
             ok += 1
             continue
 
-        for i in range(0, len(values) - 1):
+        for i in range(0, len(values)):
             tmp = values.copy()
             del tmp[i]
 
             if check_row(tmp):
                 ok += 1
+                break
 
     return ok
 
