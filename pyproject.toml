@@ -55,9 +55,6 @@ lint.ignore = [ "E741", "PLR2004" ]
 [tool.pycln]
 all = true
 
-[tool.mypy]
-plugins = [ "mypy_django_plugin.main" ]
-
 [tool.commitizen]
 name = "cz_conventional_commits"
 tag_format = "$version"
