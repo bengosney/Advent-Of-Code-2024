@@ -1,26 +1,24 @@
 from utils import read_input, no_input_skip  # noqa
 from itertools import pairwise
+from collections.abc import Iterable
 
 
-def check_row(row: list[int]) -> bool:
+def check_row(row: Iterable[int]) -> bool:
     row_dir = 0
     for a, b in pairwise(row):
-        dir = -1 if a < b else 1
-        if row_dir not in (0, dir):
+        dir = (a < b) - (a > b)
+        if abs(a - b) not in (1, 2, 3) or row_dir not in (0, dir):
             return False
         row_dir = dir
-
-        change = abs(a - b)
-        if change not in (1, 2, 3):
-            return False
 
     return True
 
 
 def part_1(puzzle: str) -> int:
     ok = 0
+
     for row in puzzle.splitlines():
-        if check_row(list(map(int, row.split()))):
+        if check_row(map(int, row.split())):
             ok += 1
 
     return ok
@@ -30,17 +28,8 @@ def part_2(puzzle: str) -> int:
     ok = 0
     for row in puzzle.splitlines():
         values = list(map(int, row.split()))
-        if check_row(values):
+        if check_row(values) or any(check_row(values[:i] + values[i + 1 :]) for i in range(len(values))):
             ok += 1
-            continue
-
-        for i in range(0, len(values)):
-            tmp = values.copy()
-            del tmp[i]
-
-            if check_row(tmp):
-                ok += 1
-                break
 
     return ok
 
