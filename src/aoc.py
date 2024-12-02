@@ -27,7 +27,8 @@ class DayType(str, Enum):
     #    cog.outl(f'{day.upper()} = "{day}"')
     # ]]]
     DAY_01 = "day_01"
-    # [[[end]]] (checksum: 6905f4a0b9709141cfc527c4af171f9b)
+    DAY_02 = "day_02"
+    # [[[end]]] (checksum: 4e6ddfef11158e515c90c0e891591a45)
 
 
 class SortType(str, Enum):
