@@ -1,6 +1,7 @@
-from utils import read_input, no_input_skip  # noqa
-from itertools import pairwise
 from collections.abc import Iterable
+from itertools import pairwise
+
+from utils import no_input_skip, read_input
 
 
 def check_row(row: Iterable[int]) -> bool:
@@ -14,23 +15,18 @@ def check_row(row: Iterable[int]) -> bool:
     return True
 
 
+def puzzle_to_ints(puzzle: str) -> list[list[int]]:
+    return [list(map(int, row.split())) for row in puzzle.splitlines()]
+
+
 def part_1(puzzle: str) -> int:
-    ok = 0
-
-    for row in puzzle.splitlines():
-        if check_row(map(int, row.split())):
-            ok += 1
-
-    return ok
+    return sum(check_row(row) for row in puzzle_to_ints(puzzle))
 
 
 def part_2(puzzle: str) -> int:
     ok = 0
-    for row in puzzle.splitlines():
-        values = list(map(int, row.split()))
-        if check_row(values) or any(check_row(values[:i] + values[i + 1 :]) for i in range(len(values))):
-            ok += 1
-
+    for row in puzzle_to_ints(puzzle):
+        ok += check_row(row) or any(check_row(row[:i] + row[i + 1 :]) for i in range(len(row)))
     return ok
 
 
