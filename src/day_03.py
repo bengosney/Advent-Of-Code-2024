@@ -4,16 +4,14 @@ from utils import no_input_skip, read_input
 
 
 def part_1(puzzle: str) -> int:
-    matches = map(lambda x: x.groups(), re.finditer(r"mul\((\d+),(\d+)\)", puzzle))
-
-    return sum(int(match[0]) * int(match[1]) for match in matches)
+    return sum(int(a) * int(b) for a, b in re.findall(r"mul\((\d+),(\d+)\)", puzzle))
 
 
 def part_2(puzzle: str) -> int:
     working = True
     total = 0
     for match in re.finditer(r"mul\((\d+),(\d+)\)|(do\(\))|(don't\(\))", puzzle):
-        match list(filter(lambda x: x is not None, list(match.groups()))):
+        match [x for x in match.groups() if x is not None]:
             case ["do()"]:
                 working = True
             case ["don't()"]:
