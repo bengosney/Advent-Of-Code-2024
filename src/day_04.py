@@ -6,46 +6,41 @@ WORD_TO_FIND = "XMAS"
 WORD_LENGTH = len(WORD_TO_FIND)
 
 
-def part_1(puzzle: str) -> int:
-    to_check = [list(WORD_TO_FIND), list(reversed(WORD_TO_FIND))]
-
-    grid = defaultdict(lambda: ".")
+def puzzle_to_grid(puzzle: str) -> dict:
+    grid = defaultdict(str)
     lines = puzzle.split("\n")
-    y_length = len(lines)
-    x_length = max(len(line) for line in lines)
 
     for y, line in enumerate(lines):
         for x, cell in enumerate(line):
             grid[(x, y)] = cell
 
+    return grid
+
+
+def part_1(puzzle: str) -> int:
+    grid = puzzle_to_grid(puzzle)
+
+    to_check = [list(WORD_TO_FIND), list(reversed(WORD_TO_FIND))]
     found = 0
 
-    for y in range(y_length):
-        for x in range(x_length):
-            if [grid[(x + i, y)] for i in range(WORD_LENGTH)] in to_check:
-                found += 1
+    for x, y in [k for k in grid.keys()]:
+        if [grid[(x + i, y)] for i in range(WORD_LENGTH)] in to_check:
+            found += 1
 
-            if [grid[(x, y + i)] for i in range(WORD_LENGTH)] in to_check:
-                found += 1
+        if [grid[(x, y + i)] for i in range(WORD_LENGTH)] in to_check:
+            found += 1
 
-            if [grid[(x + i, y + i)] for i in range(WORD_LENGTH)] in to_check:
-                found += 1
+        if [grid[(x + i, y + i)] for i in range(WORD_LENGTH)] in to_check:
+            found += 1
 
-            if [grid[(x - i, y + i)] for i in range(WORD_LENGTH)] in to_check:
-                found += 1
+        if [grid[(x - i, y + i)] for i in range(WORD_LENGTH)] in to_check:
+            found += 1
 
     return found
 
 
 def part_2(puzzle: str) -> int:
-    grid = defaultdict(lambda: ".")
-    lines = puzzle.split("\n")
-    y_length = len(lines)
-    x_length = max(len(line) for line in lines)
-
-    for y, line in enumerate(lines):
-        for x, cell in enumerate(line):
-            grid[(x, y)] = cell
+    grid = puzzle_to_grid(puzzle)
 
     found = 0
 
@@ -57,11 +52,9 @@ def part_2(puzzle: str) -> int:
         ["M", "M", "A", "S", "S"],
     ]
 
-    for y in range(y_length):
-        for x in range(x_length):
-            bob = [grid[(x, y)], grid[(x + 2, y)], grid[(x + 1, y + 1)], grid[(x, y + 2)], grid[(x + 2, y + 2)]]
-            if bob in to_check:
-                found += 1
+    for x, y in [k for k in grid.keys()]:
+        if [grid[(x, y)], grid[(x + 2, y)], grid[(x + 1, y + 1)], grid[(x, y + 2)], grid[(x + 2, y + 2)]] in to_check:
+            found += 1
 
     return found
 
