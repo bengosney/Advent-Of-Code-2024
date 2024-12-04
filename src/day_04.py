@@ -47,7 +47,14 @@ def part_2(puzzle: str) -> int:
     ]
 
     for x, y in [k for k in grid.keys()]:
-        if [grid[(x, y)], grid[(x + 2, y)], grid[(x + 1, y + 1)], grid[(x, y + 2)], grid[(x + 2, y + 2)]] in to_check:
+        selected = [
+            grid[(x, y)],
+            grid[(x + 2, y)],
+            grid[(x + 1, y + 1)],
+            grid[(x, y + 2)],
+            grid[(x + 2, y + 2)],
+        ]
+        if selected in to_check:
             found += 1
 
     return found
