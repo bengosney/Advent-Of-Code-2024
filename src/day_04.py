@@ -23,18 +23,12 @@ def part_1(puzzle: str) -> int:
     to_check = [list(WORD_TO_FIND), list(reversed(WORD_TO_FIND))]
     found = 0
 
+    directions = [(1, 0), (0, 1), (1, 1), (1, -1)]
+
     for x, y in [k for k in grid.keys()]:
-        if [grid[(x + i, y)] for i in range(WORD_LENGTH)] in to_check:
-            found += 1
-
-        if [grid[(x, y + i)] for i in range(WORD_LENGTH)] in to_check:
-            found += 1
-
-        if [grid[(x + i, y + i)] for i in range(WORD_LENGTH)] in to_check:
-            found += 1
-
-        if [grid[(x - i, y + i)] for i in range(WORD_LENGTH)] in to_check:
-            found += 1
+        for dx, dy in directions:
+            if [grid[(x + i * dx, y + i * dy)] for i in range(WORD_LENGTH)] in to_check:
+                found += 1
 
     return found
 
