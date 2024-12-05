@@ -24,12 +24,18 @@ def in_order(ordering: Iterable[tuple[int, int]], pages: list[int]) -> bool:
     return True
 
 
+def filter_orderings(ordering: Iterable[tuple[int, int]], pages: list[int]) -> list[tuple[int, int]]:
+    pages_set = set(pages)
+    return [pair for pair in ordering if pair[0] in pages_set and pair[1] in pages_set]
+
+
 def part_1(puzzle: str) -> int:
     ordering, all_pages = process_input(puzzle)
 
     total = 0
     for pages in all_pages:
-        if in_order(ordering, pages):
+        filtered_ordeing = filter_orderings(ordering, pages)
+        if in_order(filtered_ordeing, pages):
             total += pages[len(pages) // 2]
 
     return total
@@ -39,11 +45,8 @@ def reorder(ordering: Iterable[tuple[int, int]], pages: list[int]) -> list[int]:
     while not in_order(ordering, pages):
         for pos, page in enumerate(pages):
             for pair in ordering:
-                try:
-                    if page == pair[1] and (idx := pages.index(pair[0])) > pos:
-                        pages[pos], pages[idx] = pages[idx], pages[pos]  # noqa: PLR1736
-                except ValueError:
-                    pass
+                if page == pair[1] and (idx := pages.index(pair[0])) > pos:
+                    pages[pos], pages[idx] = pages[idx], pages[pos]  # noqa: PLR1736
 
     return pages
 
@@ -53,8 +56,9 @@ def part_2(puzzle: str) -> int:
 
     total = 0
     for pages in all_pages:
-        if not in_order(ordering, pages):
-            ordered = reorder(ordering, pages)
+        filtered_ordeing = filter_orderings(ordering, pages)
+        if not in_order(filtered_ordeing, pages):
+            ordered = reorder(filtered_ordeing, pages)
             total += ordered[len(pages) // 2]
 
     return total
