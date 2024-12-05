@@ -3,13 +3,17 @@ from collections.abc import Iterable
 from utils import no_input_skip, read_input
 
 
-def process_input(puzzle: str) -> tuple[Iterable[Iterable[int]], Iterable[list[int]]]:
+def process_input(puzzle: str) -> tuple[Iterable[tuple[int, int]], Iterable[list[int]]]:
     ordering, pages = puzzle.strip().split("\n\n")
-    ordering = [tuple(map(int, pair.split("|"))) for pair in ordering.split("\n")]
+
+    ordering_rules: Iterable[tuple[int, int]] = []
+    for pair in ordering.split("\n"):
+        rules = pair.split("|")
+        ordering_rules.append((int(rules[0]), int(rules[1])))
 
     pages = [[int(page) for page in row.split(",")] for row in pages.strip().split("\n")]
 
-    return ordering, pages
+    return ordering_rules, pages
 
 
 def in_order(ordering: Iterable[tuple[int, int]], pages: list[int]) -> bool:
@@ -31,8 +35,31 @@ def part_1(puzzle: str) -> int:
     return total
 
 
+def reorder(ordering: Iterable[tuple[int, int]], pages: list[int]) -> list[int]:
+    attempts = 0
+    while not in_order(ordering, pages) and attempts < 20:
+        attempts += 1
+        for pos, page in enumerate(pages):
+            for pair in ordering:
+                try:
+                    if page == pair[1] and (idx := pages.index(pair[0])) > pos:
+                        pages[pos], pages[idx] = pages[idx], pages[pos]  # noqa: PLR1736
+                except ValueError:
+                    pass
+
+    return pages
+
+
 def part_2(puzzle: str) -> int:
-    pass
+    ordering, all_pages = process_input(puzzle)
+
+    total = 0
+    for pages in all_pages:
+        if not in_order(ordering, pages):
+            ordered = reorder(ordering, pages)
+            total += ordered[len(pages) // 2]
+
+    return total
 
 
 # -- Tests
@@ -75,9 +102,9 @@ def test_part_1() -> None:
     assert part_1(test_input) == 143
 
 
-# def test_part_2() -> None:
-#     test_input = get_example_input()
-#     assert part_2(test_input) == 123
+def test_part_2() -> None:
+    test_input = get_example_input()
+    assert part_2(test_input) == 123
 
 
 @no_input_skip
@@ -86,10 +113,10 @@ def test_part_1_real() -> None:
     assert part_1(real_input) == 5208
 
 
-# @no_input_skip
-# def test_part_2_real() -> None:
-#     real_input = read_input(__file__)
-#     assert part_2(real_input) is not None
+@no_input_skip
+def test_part_2_real() -> None:
+    real_input = read_input(__file__)
+    assert part_2(real_input) == 6732
 
 
 # -- Main
