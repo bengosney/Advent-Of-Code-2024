@@ -36,9 +36,7 @@ def part_1(puzzle: str) -> int:
 
 
 def reorder(ordering: Iterable[tuple[int, int]], pages: list[int]) -> list[int]:
-    attempts = 0
-    while not in_order(ordering, pages) and attempts < 20:
-        attempts += 1
+    while not in_order(ordering, pages):
         for pos, page in enumerate(pages):
             for pair in ordering:
                 try:
