@@ -70,24 +70,24 @@ def test_looping_error():
 
 
 def part_1(puzzle: str) -> int:
-    map, position = puzzle_to_map(puzzle)
-    seen = walk_path(map, position)
+    map, start_position = puzzle_to_map(puzzle)
+    seen = walk_path(map, start_position)
 
     return len(seen)
 
 
 def part_2(puzzle: str) -> int:
-    map, position = puzzle_to_map(puzzle)
-    seen = walk_path(map.copy(), position)
+    map, start_position = puzzle_to_map(puzzle)
+    seen = walk_path(map.copy(), start_position)
 
     loops = 0
-    for pos in seen:
-        map[pos] = "#"
+    for obstruction_position in seen:
+        map[obstruction_position] = "#"
         try:
-            walk_path(map.copy(), position)
+            walk_path(map.copy(), start_position)
         except LoopingError:
             loops += 1
-        map[pos] = "."
+        map[obstruction_position] = "."
 
     return loops
 
