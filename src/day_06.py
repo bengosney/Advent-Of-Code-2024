@@ -32,12 +32,10 @@ def walk_path(map: dict[Point, str], start: Point) -> set[Point]:
     position = start
     directions = deque([(0, -1), (1, 0), (0, 1), (-1, 0)])
 
-    seen: set[Point] = set()
     seen_directions: defaultdict[Point, set[Point]] = defaultdict(set)
 
     try:
         while True:
-            seen.add(position)
             if directions[0] in seen_directions[position]:
                 raise LoopingError()
             seen_directions[position].add(directions[0])
@@ -49,7 +47,7 @@ def walk_path(map: dict[Point, str], start: Point) -> set[Point]:
     except KeyError:
         pass
 
-    return seen
+    return set(seen_directions.keys())
 
 
 def part_1(puzzle: str) -> int:
