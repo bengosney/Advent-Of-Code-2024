@@ -1,6 +1,7 @@
 from collections import defaultdict, deque
 
 import pytest
+from rich.progress import Progress
 
 from utils import no_input_skip, read_input
 
@@ -14,9 +15,7 @@ def puzzle_to_map(puzzle: str) -> tuple[dict[Point, str], Point]:
         for x, cell in enumerate(line):
             if cell == "^":
                 start = (x, y)
-                map[(x, y)] = "."
-            else:
-                map[(x, y)] = cell
+            map[(x, y)] = "." if cell == "^" else cell
 
     return map, start
 
@@ -62,16 +61,19 @@ def part_1(puzzle: str) -> int:
 
 def part_2(puzzle: str) -> int:
     map, start_position = puzzle_to_map(puzzle)
-    seen = walk_path(map.copy(), start_position)
+    seen = walk_path(map, start_position)
 
     loops = 0
-    for obstruction_position in seen:
-        map[obstruction_position] = "#"
-        try:
-            walk_path(map.copy(), start_position)
-        except LoopingError:
-            loops += 1
-        map[obstruction_position] = "."
+    with Progress(transient=True) as progress:
+        task = progress.add_task("Obstructions", total=len(seen))
+        for obstruction_position in seen:
+            progress.update(task, advance=1)
+            map[obstruction_position] = "#"
+            try:
+                walk_path(map, start_position)
+            except LoopingError:
+                loops += 1
+            map[obstruction_position] = "."
 
     return loops
 
