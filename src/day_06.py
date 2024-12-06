@@ -20,10 +20,6 @@ def puzzle_to_map(puzzle: str) -> tuple[dict[Point, str], Point]:
     return map, start
 
 
-def add(a: Point, b: Point) -> Point:
-    return (a[0] + b[0], a[1] + b[1])
-
-
 class LoopingError(Exception):
     pass
 
@@ -39,11 +35,11 @@ def walk_path(map: dict[Point, str], start: Point) -> set[Point]:
             if directions[0] in seen_directions[position]:
                 raise LoopingError()
             seen_directions[position].add(directions[0])
-            next = map[add(position, directions[0])]
+            next = map[(position[0] + directions[0][0], position[1] + directions[0][1])]
             if next == "#":
                 directions.rotate(-1)
             else:
-                position = add(position, directions[0])
+                position = (position[0] + directions[0][0], position[1] + directions[0][1])
     except KeyError:
         pass
 
