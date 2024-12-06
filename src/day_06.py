@@ -53,22 +53,6 @@ def walk_path(map: dict[Point, str], start: Point) -> set[Point]:
     return seen
 
 
-def test_looping_error():
-    input = """....#.....
-....+---+#
-....|...|.
-..#.|...|.
-....|..#|.
-....|...|.
-.#.#^---+.
-........#.
-#.........
-......#..."""
-    map, position = puzzle_to_map(input)
-    with pytest.raises(LoopingError):
-        walk_path(map, position)
-
-
 def part_1(puzzle: str) -> int:
     map, start_position = puzzle_to_map(puzzle)
     seen = walk_path(map, start_position)
@@ -93,6 +77,22 @@ def part_2(puzzle: str) -> int:
 
 
 # -- Tests
+
+
+def test_looping_error():
+    input = """....#.....
+....+---+#
+....|...|.
+..#.|...|.
+....|..#|.
+....|...|.
+.#.#^---+.
+........#.
+#.........
+......#..."""
+    map, position = puzzle_to_map(input)
+    with pytest.raises(LoopingError):
+        walk_path(map, position)
 
 
 def get_example_input() -> str:
@@ -124,10 +124,11 @@ def test_part_1_real() -> None:
     assert part_1(real_input) == 5404
 
 
-# @no_input_skip
-# def test_part_2_real() -> None:
-#     real_input = read_input(__file__)
-#     assert part_2(real_input) is not None
+@no_input_skip
+@pytest.mark.slow
+def test_part_2_real() -> None:
+    real_input = read_input(__file__)
+    assert part_2(real_input) == 1984
 
 
 # -- Main
