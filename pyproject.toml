@@ -26,6 +26,7 @@ optional-dependencies.dev = [
   "mypy",
   "pip-tools",
   "pre-commit",
+  "pytest-skip-slow",
   "pytest-testmon",
   "pytest-watch",
   "ruff",
@@ -54,6 +55,9 @@ lint.ignore = [ "E741", "PLR2004" ]
 
 [tool.pycln]
 all = true
+
+[tool.pytest]
+markers = "slow: marks tests as slow (deselect with '-m \"not slow\"')"
 
 [tool.commitizen]
 name = "cz_conventional_commits"
