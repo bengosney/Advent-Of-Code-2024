@@ -1,4 +1,4 @@
-from collections import defaultdict, deque
+from collections import deque
 
 import pytest
 from rich.progress import Progress
@@ -27,23 +27,23 @@ class LoopingError(Exception):
 def walk_path(map: dict[Point, str], start: Point) -> set[Point]:
     position = start
     directions = deque([(0, -1), (1, 0), (0, 1), (-1, 0)])
-
-    seen_directions: defaultdict[Point, set[Point]] = defaultdict(set)
+    seen_directions: set[tuple[Point, Point]] = set()
 
     try:
         while True:
-            if directions[0] in seen_directions[position]:
+            if (directions[0], position) in seen_directions:
                 raise LoopingError()
-            seen_directions[position].add(directions[0])
-            next = map[(position[0] + directions[0][0], position[1] + directions[0][1])]
+            seen_directions.add((directions[0], position))
+            next_position = (position[0] + directions[0][0], position[1] + directions[0][1])
+            next = map[next_position]
             if next == "#":
                 directions.rotate(-1)
             else:
-                position = (position[0] + directions[0][0], position[1] + directions[0][1])
+                position = next_position
     except KeyError:
         pass
 
-    return set(seen_directions.keys())
+    return {p for _, p in seen_directions}
 
 
 def part_1(puzzle: str) -> int:
