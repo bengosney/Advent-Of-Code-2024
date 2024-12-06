@@ -1,4 +1,6 @@
-from collections import deque
+from collections import defaultdict, deque
+
+import pytest
 
 from utils import no_input_skip, read_input
 
@@ -23,15 +25,23 @@ def add(a: Point, b: Point) -> Point:
     return (a[0] + b[0], a[1] + b[1])
 
 
-def part_1(puzzle: str) -> int:
-    map, position = puzzle_to_map(puzzle)
+class LoopingError(Exception):
+    pass
+
+
+def walk_path(map: dict[Point, str], start: Point) -> set[Point]:
+    position = start
     directions = deque([(0, -1), (1, 0), (0, 1), (-1, 0)])
 
     seen: set[Point] = set()
+    seen_directions: defaultdict[Point, set[Point]] = defaultdict(set)
 
     try:
         while True:
             seen.add(position)
+            if directions[0] in seen_directions[position]:
+                raise LoopingError()
+            seen_directions[position].add(directions[0])
             next = map[add(position, directions[0])]
             if next == "#":
                 directions.rotate(-1)
@@ -40,11 +50,46 @@ def part_1(puzzle: str) -> int:
     except KeyError:
         pass
 
+    return seen
+
+
+def test_looping_error():
+    input = """....#.....
+....+---+#
+....|...|.
+..#.|...|.
+....|..#|.
+....|...|.
+.#.#^---+.
+........#.
+#.........
+......#..."""
+    map, position = puzzle_to_map(input)
+    with pytest.raises(LoopingError):
+        walk_path(map, position)
+
+
+def part_1(puzzle: str) -> int:
+    map, position = puzzle_to_map(puzzle)
+    seen = walk_path(map, position)
+
     return len(seen)
 
 
 def part_2(puzzle: str) -> int:
-    pass
+    map, position = puzzle_to_map(puzzle)
+    seen = walk_path(map.copy(), position)
+
+    loops = 0
+    for pos in seen:
+        map[pos] = "#"
+        try:
+            walk_path(map.copy(), position)
+        except LoopingError:
+            loops += 1
+        map[pos] = "."
+
+    return loops
 
 
 # -- Tests
@@ -68,9 +113,9 @@ def test_part_1() -> None:
     assert part_1(test_input) == 41
 
 
-# def test_part_2() -> None:
-#     test_input = get_example_input()
-#     assert part_2(test_input) is not None
+def test_part_2() -> None:
+    test_input = get_example_input()
+    assert part_2(test_input) == 6
 
 
 @no_input_skip
