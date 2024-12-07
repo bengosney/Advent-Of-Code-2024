@@ -1,13 +1,8 @@
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from operator import add, mul
 
 from utils import no_input_skip, read_input
-
-ops = [
-    add,
-    mul,
-]
 
 
 @dataclass(frozen=True)
@@ -16,16 +11,16 @@ class Calibration:
     test_values: list[int]
 
 
-def calculate(values: list[int]) -> list[int]:
+def calculate(values: list[int], operators: list[Callable]) -> list[int]:
     if len(values) == 1:
         return values
 
     left = values[0]
-    rights = calculate(values[1:])
+    rights = calculate(values[1:], operators)
     answers = []
     for right in rights:
-        for op in ops:
-            r = op(left, right)
+        for op in operators:
+            r = op(right, left)
             answers.append(r)
 
     return answers
@@ -45,18 +40,35 @@ def part_1(puzzle: str) -> int:
     for calibration in calibrations:
         values = calibration.test_values
         values.reverse()
-        answers = calculate(values)
+        answers = calculate(values, [add, mul])
         if any(answer == calibration.answer for answer in answers):
             total += calibration.answer
 
     return total
 
 
+def concatenation(a: int, b: int) -> int:
+    return int(str(a) + str(b))
+
+
 def part_2(puzzle: str) -> int:
-    pass
+    total = 0
+    calibrations = parse_input(puzzle)
+    for calibration in calibrations:
+        values = calibration.test_values
+        values.reverse()
+        answers = calculate(values, [add, mul, concatenation])
+        if any(answer == calibration.answer for answer in answers):
+            total += calibration.answer
+
+    return total
 
 
 # -- Tests
+
+
+def test_concatenation() -> None:
+    assert concatenation(12, 345) == 12345
 
 
 def get_example_input() -> str:
@@ -76,9 +88,9 @@ def test_part_1() -> None:
     assert part_1(test_input) == 3749
 
 
-# def test_part_2() -> None:
-#     test_input = get_example_input()
-#     assert part_2(test_input) is not None
+def test_part_2() -> None:
+    test_input = get_example_input()
+    assert part_2(test_input) == 11387
 
 
 @no_input_skip
