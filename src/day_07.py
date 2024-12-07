@@ -13,17 +13,13 @@ class Calibration:
     test_values: list[int]
 
 
-def calculate(values: list[int], operators: list[Callable]) -> list[int]:
+def calculate(values: list[int], operators: list[Callable]) -> Iterable[int]:
     if len(values) == 1:
         return values
 
-    left = values[0]
-    rights = calculate(values[1:], operators)
     answers = []
-    for right in rights:
-        for op in operators:
-            r = op(right, left)
-            answers.append(r)
+    for calculated in calculate(values[1:], operators):
+        answers.extend([op(calculated, values[0]) for op in operators])
 
     return answers
 
