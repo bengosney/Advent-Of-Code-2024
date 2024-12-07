@@ -15,13 +15,20 @@ class Calibration:
 
 def calculate(values: list[int], operators: list[Callable]) -> Iterable[int]:
     if len(values) == 1:
-        return values
+        yield from values
+    else:
+        for calculated in calculate(values[1:], operators):
+            yield from [op(calculated, values[0]) for op in operators]
 
-    answers = []
+
+def is_valid(calibration: Calibration, operators: list[Callable]) -> bool:
+    values = calibration.test_values
+    answer = calibration.answer
+
     for calculated in calculate(values[1:], operators):
-        answers.extend([op(calculated, values[0]) for op in operators])
-
-    return answers
+        if answer in [op(calculated, values[0]) for op in operators]:
+            return True
+    return False
 
 
 def parse_input(puzzle: str) -> Iterable[Calibration]:
@@ -36,8 +43,7 @@ def part_1(puzzle: str) -> int:
     total = 0
     for calibration in parse_input(puzzle):
         calibration.test_values.reverse()
-        answers = calculate(calibration.test_values, [add, mul])
-        if any([answer == calibration.answer for answer in answers]):
+        if is_valid(calibration, [add, mul]):
             total += calibration.answer
 
     return total
@@ -51,8 +57,7 @@ def part_2(puzzle: str) -> int:
     total = 0
     for calibration in parse_input(puzzle):
         calibration.test_values.reverse()
-        answers = calculate(calibration.test_values, [add, mul, concatenation])
-        if any([answer == calibration.answer for answer in answers]):
+        if is_valid(calibration, [add, mul, concatenation]):
             total += calibration.answer
 
     return total
