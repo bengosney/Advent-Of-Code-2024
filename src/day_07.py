@@ -34,12 +34,10 @@ def parse_input(puzzle: str) -> Iterable[Calibration]:
 
 def part_1(puzzle: str) -> int:
     total = 0
-    calibrations = parse_input(puzzle)
-    for calibration in calibrations:
-        values = calibration.test_values
-        values.reverse()
-        answers = calculate(values, [add, mul])
-        if any(answer == calibration.answer for answer in answers):
+    for calibration in parse_input(puzzle):
+        calibration.test_values.reverse()
+        answers = calculate(calibration.test_values, [add, mul])
+        if any([answer == calibration.answer for answer in answers]):
             total += calibration.answer
 
     return total
@@ -51,12 +49,10 @@ def concatenation(a: int, b: int) -> int:
 
 def part_2(puzzle: str) -> int:
     total = 0
-    calibrations = parse_input(puzzle)
-    for calibration in calibrations:
-        values = calibration.test_values
-        values.reverse()
-        answers = calculate(values, [add, mul, concatenation])
-        if any(answer == calibration.answer for answer in answers):
+    for calibration in parse_input(puzzle):
+        calibration.test_values.reverse()
+        answers = calculate(calibration.test_values, [add, mul, concatenation])
+        if any([answer == calibration.answer for answer in answers]):
             total += calibration.answer
 
     return total
