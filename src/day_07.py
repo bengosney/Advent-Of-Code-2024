@@ -44,7 +44,7 @@ def part_1(puzzle: str) -> int:
 
 
 def concatenation(a: int, b: int) -> int:
-    return int(str(a) + str(b))
+    return int(f"{a}{b}")
 
 
 def part_2(puzzle: str) -> int:
