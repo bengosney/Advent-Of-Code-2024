@@ -2,6 +2,8 @@ from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from operator import add, mul
 
+import pytest
+
 from utils import no_input_skip, read_input
 
 
@@ -99,10 +101,11 @@ def test_part_1_real() -> None:
     assert part_1(real_input) == 5512534574980
 
 
-# @no_input_skip
-# def test_part_2_real() -> None:
-#     real_input = read_input(__file__)
-#     assert part_2(real_input) is not None
+@no_input_skip
+@pytest.mark.slow
+def test_part_2_real() -> None:
+    real_input = read_input(__file__)
+    assert part_2(real_input) == 328790210468594
 
 
 # -- Main
