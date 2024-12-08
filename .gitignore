@@ -198,3 +198,4 @@ cookies.txt
 .install.state
 /cookies.txt
 pytest.ini
+report/*.html

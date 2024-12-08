@@ -1,4 +1,4 @@
-.PHONY: help clean test install all init dev cli go today day_% inputs
+.PHONY: help clean test install all init dev cli go today day_% inputs reports
 .DEFAULT_GOAL := today
 
 .PRECIOUS: src/day_%.py inputs/day_%.txt
@@ -67,6 +67,7 @@ clean: ## Remove all build files
 	find . -type d -name '__pycache__' -delete
 	find . -type d -name '*.egg-info' -exec rm -rf {} +
 	rm -rf .pytest_cache .testmondata
+	rm -rf report
 
 .direnv: .envrc $(UV_PATH) requirements.txt $(REQS)
 	@echo "Installing $(filter %.txt,$^)"
@@ -107,3 +108,8 @@ today: day_$(CURRENT_DAY) ## Setup current day and start runing test monitor
 
 cli: src/aoc.py .direnv
 	@python -m pip install -e .
+
+report/day_%.html: src/day_%.py inputs/day_%.txt
+	specialist --output report --targets $< -m pytest $<
+
+reports: $(patsubst src/day_%.py,report/day_%.html,$(ALLDAYS))
