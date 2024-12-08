@@ -31,7 +31,30 @@ def part_1(puzzle: str) -> int:
 
 
 def part_2(puzzle: str) -> int:
-    pass
+    map, extents = parse_input(puzzle)
+    antinodes: set[complex] = set()
+
+    def in_bounds(a: complex) -> bool:
+        return 0 <= a.real <= extents.real and 0 <= a.imag <= extents.imag
+
+    for positions in map.values():
+        if len(positions) < 2:
+            continue
+        for a, b in combinations(positions, 2):
+            antinodes.add(a)
+            antinodes.add(b)
+
+            dist = a - b
+            node = a + dist
+            while in_bounds(node):
+                antinodes.add(node)
+                node += dist
+            node = b - dist
+            while in_bounds(node):
+                antinodes.add(node)
+                node -= dist
+
+    return len(antinodes)
 
 
 # -- Tests
@@ -57,9 +80,9 @@ def test_part_1() -> None:
     assert part_1(test_input) == 14
 
 
-# def test_part_2() -> None:
-#     test_input = get_example_input()
-#     assert part_2(test_input) is not None
+def test_part_2() -> None:
+    test_input = get_example_input()
+    assert part_2(test_input) == 34
 
 
 @no_input_skip
@@ -68,10 +91,10 @@ def test_part_1_real() -> None:
     assert part_1(real_input) == 261
 
 
-# @no_input_skip
-# def test_part_2_real() -> None:
-#     real_input = read_input(__file__)
-#     assert part_2(real_input) is not None
+@no_input_skip
+def test_part_2_real() -> None:
+    real_input = read_input(__file__)
+    assert part_2(real_input) == 898
 
 
 # -- Main
