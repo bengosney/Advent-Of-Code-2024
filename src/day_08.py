@@ -1,7 +1,7 @@
 from collections import defaultdict
 from itertools import combinations
 
-from utils import draw_grid, no_input_skip, read_input  # noqa: F401
+from utils import no_input_skip, read_input
 
 
 def parse_input(puzzle: str) -> tuple[dict[str, set[complex]], complex]:
@@ -37,22 +37,16 @@ def part_2(puzzle: str) -> int:
     def in_bounds(a: complex) -> bool:
         return 0 <= a.real <= extents.real and 0 <= a.imag <= extents.imag
 
-    for positions in map.values():
-        if len(positions) < 2:
-            continue
-        for a, b in combinations(positions, 2):
-            antinodes.add(a)
-            antinodes.add(b)
+    def calculate_nodes(start: complex, dist: complex) -> None:
+        node = start
+        while in_bounds(node):
+            antinodes.add(node)
+            node += dist
 
-            dist = a - b
-            node = a + dist
-            while in_bounds(node):
-                antinodes.add(node)
-                node += dist
-            node = b - dist
-            while in_bounds(node):
-                antinodes.add(node)
-                node -= dist
+    for positions in map.values():
+        for a, b in combinations(positions, 2):
+            calculate_nodes(a, a - b)
+            calculate_nodes(b, b - a)
 
     return len(antinodes)
 
