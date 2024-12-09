@@ -42,9 +42,7 @@ def sort_blocks(blocks: list[Block]) -> list[Block]:
 def sort_files(blocks: list[Block]) -> list[Block]:
     right = len(blocks) - 1
     moved: set[int] = set()
-
-    def draw():
-        print("".join(str(b) for b in blocks))
+    first_space = 0
 
     with Progress(transient=True) as progress:
         task = progress.add_task("Sorting files...", total=right)
@@ -53,33 +51,31 @@ def sort_files(blocks: list[Block]) -> list[Block]:
             progress.update(task, completed=total - right)
             while right >= 0 and (blocks[right] == "." and blocks[right] not in moved):
                 right -= 1
-            file_end = right
-            while right >= 0 and blocks[right] == blocks[file_end]:
+            f2 = right
+            while right >= 0 and blocks[right] == blocks[f2]:
                 right -= 1
-            file_length = file_end - right
-            file_start = right + 1
-            file_end = file_start + file_length
+            length = f2 - right
+            f1 = right + 1
+            f2 = f1 + length
 
             space_found = 0
-            for i in range(len(blocks)):
+            set_first_space = False
+            for i in range(first_space, f1):
                 if blocks[i] == ".":
                     space_found += 1
-                    if space_found == file_length:
-                        break
+                    if not set_first_space:
+                        first_space = i
+                        set_first_space = True
                 else:
                     space_found = 0
+                if space_found == length:
+                    break
             else:
                 continue
 
-            if i > file_start:
-                continue
-
-            space_end = i + 1
-            space_start = space_end - file_length
-            blocks[space_start:space_end], blocks[file_start:file_end] = (
-                blocks[file_start:file_end],
-                blocks[space_start:space_end],
-            )
+            s2 = i + 1
+            s1 = s2 - length
+            blocks[s1:s2], blocks[f1:f2] = blocks[f1:f2], blocks[s1:s2]
 
     return blocks
 
