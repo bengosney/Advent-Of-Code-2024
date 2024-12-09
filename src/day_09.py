@@ -1,5 +1,8 @@
 from typing import Literal
 
+import pytest
+from rich.progress import Progress
+
 from utils import no_input_skip, read_input
 
 Block = int | Literal["."]
@@ -36,6 +39,51 @@ def sort_blocks(blocks: list[Block]) -> list[Block]:
     return blocks
 
 
+def sort_files(blocks: list[Block]) -> list[Block]:
+    right = len(blocks) - 1
+    moved: set[int] = set()
+
+    def draw():
+        print("".join(str(b) for b in blocks))
+
+    with Progress(transient=True) as progress:
+        task = progress.add_task("Sorting files...", total=right)
+        total = right
+        while right >= 0:
+            progress.update(task, completed=total - right)
+            while right >= 0 and (blocks[right] == "." and blocks[right] not in moved):
+                right -= 1
+            file_end = right
+            while right >= 0 and blocks[right] == blocks[file_end]:
+                right -= 1
+            file_length = file_end - right
+            file_start = right + 1
+            file_end = file_start + file_length
+
+            space_found = 0
+            for i in range(len(blocks)):
+                if blocks[i] == ".":
+                    space_found += 1
+                    if space_found == file_length:
+                        break
+                else:
+                    space_found = 0
+            else:
+                continue
+
+            if i > file_start:
+                continue
+
+            space_end = i + 1
+            space_start = space_end - file_length
+            blocks[space_start:space_end], blocks[file_start:file_end] = (
+                blocks[file_start:file_end],
+                blocks[space_start:space_end],
+            )
+
+    return blocks
+
+
 def checksum(blocks: list[Block]) -> int:
     value = 0
     for position, id in enumerate(blocks):
@@ -55,46 +103,13 @@ def part_1(puzzle: str) -> int:
 
 
 def part_2(puzzle: str) -> int:
-    pass
+    blocks = parse_input(puzzle)
+    blocks = sort_files(blocks)
+
+    return checksum(blocks)
 
 
 # -- Tests
-
-
-def test_sort_blocks() -> None:
-    input = parse_input(get_example_input())
-    result = sort_blocks(input)
-    assert result == [
-        0,
-        0,
-        9,
-        9,
-        8,
-        1,
-        1,
-        1,
-        8,
-        8,
-        8,
-        2,
-        7,
-        7,
-        7,
-        3,
-        3,
-        3,
-        6,
-        4,
-        4,
-        6,
-        5,
-        5,
-        5,
-        5,
-        6,
-        6,
-        *list(".............."),
-    ]
 
 
 def get_example_input() -> str:
@@ -106,9 +121,9 @@ def test_part_1() -> None:
     assert part_1(test_input) == 1928
 
 
-# def test_part_2() -> None:
-#     test_input = get_example_input()
-#     assert part_2(test_input) is not None
+def test_part_2() -> None:
+    test_input = get_example_input()
+    assert part_2(test_input) == 2858
 
 
 @no_input_skip
@@ -117,10 +132,11 @@ def test_part_1_real() -> None:
     assert part_1(real_input) == 6258319840548
 
 
-# @no_input_skip
-# def test_part_2_real() -> None:
-#     real_input = read_input(__file__)
-#     assert part_2(real_input) is not None
+@no_input_skip
+@pytest.mark.slow
+def test_part_2_real() -> None:
+    real_input = read_input(__file__)
+    assert part_2(real_input) == 6286182965311
 
 
 # -- Main
