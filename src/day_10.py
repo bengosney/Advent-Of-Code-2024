@@ -1,5 +1,4 @@
 from collections import defaultdict, deque
-from functools import partial
 
 from utils import no_input_skip, read_input
 
@@ -34,9 +33,8 @@ def walk_trail(trail_map: dict[complex, int], start: complex) -> int:
 
 def part_1(puzzle: str) -> int:
     trail_map, starts = parse_input(puzzle)
-    walk_trail_map = partial(walk_trail, trail_map)
 
-    return sum(map(walk_trail_map, starts))
+    return sum(map(lambda start: walk_trail(trail_map, start), starts))
 
 
 def count_trails(trail_map: dict[complex, int], position: complex) -> int:
@@ -54,9 +52,8 @@ def count_trails(trail_map: dict[complex, int], position: complex) -> int:
 
 def part_2(puzzle: str) -> int:
     trail_map, starts = parse_input(puzzle)
-    count_trails_map = partial(count_trails, trail_map)
 
-    return sum(map(count_trails_map, starts))
+    return sum(map(lambda start: count_trails(trail_map, start), starts))
 
 
 # -- Tests
