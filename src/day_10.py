@@ -57,8 +57,30 @@ def part_1(puzzle: str) -> int:
     return walk_trail(map, starts)
 
 
+def count_trails(map: dict[complex, int], position: complex) -> int:
+    directions: list[complex] = [1 + 0j, 0 + 1j, -1 + 0j, 0 + -1j]
+    score = 0
+
+    if map[position] == 9:
+        score += 1
+    else:
+        for direction in directions:
+            next_position = position + direction
+            if map[next_position] - map[position] == 1:
+                score += count_trails(map, next_position)
+
+    return score
+
+
 def part_2(puzzle: str) -> int:
-    pass
+    map = parse_input(puzzle)
+
+    total = 0
+    for position, value in [i for i in map.items()]:
+        if value == 0:
+            total += count_trails(map, position)
+
+    return total
 
 
 # -- Tests
@@ -80,9 +102,9 @@ def test_part_1() -> None:
     assert part_1(test_input) == 36
 
 
-# def test_part_2() -> None:
-#     test_input = get_example_input()
-#     assert part_2(test_input) is not None
+def test_part_2() -> None:
+    test_input = get_example_input()
+    assert part_2(test_input) == 81
 
 
 @no_input_skip
@@ -91,10 +113,10 @@ def test_part_1_real() -> None:
     assert part_1(real_input) == 841
 
 
-# @no_input_skip
-# def test_part_2_real() -> None:
-#     real_input = read_input(__file__)
-#     assert part_2(real_input) is not None
+@no_input_skip
+def test_part_2_real() -> None:
+    real_input = read_input(__file__)
+    assert part_2(real_input) == 1875
 
 
 # -- Main
