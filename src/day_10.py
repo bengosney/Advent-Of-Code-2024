@@ -25,7 +25,8 @@ def walk_trail(trail_map: dict[complex, int], start: complex) -> int:
             found.add(position)
         else:
             for direction in [1 + 0j, 0 + 1j, -1 + 0j, 0 + -1j]:
-                if trail_map[new_position := position + direction] - trail_map[position] == 1:
+                new_position = position + direction
+                if trail_map[new_position] - trail_map[position] == 1:
                     steps.append(new_position)
 
     return len(found)
@@ -44,7 +45,8 @@ def count_trails(trail_map: dict[complex, int], position: complex) -> int:
         return 1
 
     for direction in [1 + 0j, 0 + 1j, -1 + 0j, 0 + -1j]:
-        if trail_map[next_position := position + direction] - trail_map[position] == 1:
+        next_position = position + direction
+        if trail_map[next_position] - trail_map[position] == 1:
             score += count_trails(trail_map, next_position)
 
     return score
