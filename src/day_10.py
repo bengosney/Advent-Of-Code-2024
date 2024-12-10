@@ -1,86 +1,62 @@
 from collections import defaultdict, deque
+from functools import partial
 
 from utils import no_input_skip, read_input
 
 
-def parse_input(puzzle: str) -> dict[complex, int]:
-    map = defaultdict(int)
+def parse_input(puzzle: str) -> tuple[dict[complex, int], set[complex]]:
+    trail_map: dict[complex, int] = defaultdict(int)
+    starts: set[complex] = set()
+
     for y, line in enumerate(puzzle.splitlines()):
         for x, value in enumerate(line):
-            try:
-                map[complex(x, y)] = int(value)
-            except ValueError:
-                pass
+            trail_map[complex(x, y)] = int(value)
+            if value == "0":
+                starts.add(complex(x, y))
 
-    return map
-
-
-def draw_map(map: dict[complex, str]) -> None:
-    ex = int(max(map.keys(), key=lambda x: x.real).real) + 2
-    ey = int(max(map.keys(), key=lambda x: x.imag).imag) + 2
-
-    for y in range(-1, ey):
-        for x in range(-1, ex):
-            print(map[complex(x, y)], end="")
-        print()
+    return trail_map, starts
 
 
-def walk_trail(map: dict[complex, int], starts: list[complex]) -> int:
-    directions: list[complex] = [1 + 0j, 0 + 1j, -1 + 0j, 0 + -1j]
-    score = 0
+def walk_trail(trail_map: dict[complex, int], start: complex) -> int:
+    steps = deque([start])
+    found = set()
+    while steps:
+        position = steps.popleft()
+        if trail_map[position] == 9:
+            found.add(position)
+        else:
+            for direction in [1 + 0j, 0 + 1j, -1 + 0j, 0 + -1j]:
+                if trail_map[new_position := position + direction] - trail_map[position] == 1:
+                    steps.append(new_position)
 
-    for start in starts:
-        steps = deque([start])
-        found = set()
-        while steps:
-            position = steps.popleft()
-            if map[position] == 9:
-                found.add(position)
-            else:
-                for direction in directions:
-                    new_position = position + direction
-                    if map[new_position] - map[position] == 1:
-                        steps.append(new_position)
-        score += len(found)
-
-    return score
+    return len(found)
 
 
 def part_1(puzzle: str) -> int:
-    map = parse_input(puzzle)
+    trail_map, starts = parse_input(puzzle)
+    walk_trail_map = partial(walk_trail, trail_map)
 
-    starts = []
-    for position, value in map.items():
-        if value == 0:
-            starts.append(position)
-
-    return walk_trail(map, starts)
+    return sum(map(walk_trail_map, starts))
 
 
-def count_trails(map: dict[complex, int], position: complex) -> int:
-    directions: list[complex] = [1 + 0j, 0 + 1j, -1 + 0j, 0 + -1j]
+def count_trails(trail_map: dict[complex, int], position: complex) -> int:
     score = 0
 
-    if map[position] == 9:
-        score += 1
-    else:
-        for direction in directions:
-            next_position = position + direction
-            if map[next_position] - map[position] == 1:
-                score += count_trails(map, next_position)
+    if trail_map[position] == 9:
+        return 1
+
+    for direction in [1 + 0j, 0 + 1j, -1 + 0j, 0 + -1j]:
+        if trail_map[next_position := position + direction] - trail_map[position] == 1:
+            score += count_trails(trail_map, next_position)
 
     return score
 
 
 def part_2(puzzle: str) -> int:
-    map = parse_input(puzzle)
+    trail_map, starts = parse_input(puzzle)
+    count_trails_map = partial(count_trails, trail_map)
 
-    total = 0
-    for position, value in [i for i in map.items()]:
-        if value == 0:
-            total += count_trails(map, position)
-
-    return total
+    return sum(map(count_trails_map, starts))
 
 
 # -- Tests
