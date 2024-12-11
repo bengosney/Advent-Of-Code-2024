@@ -1,11 +1,10 @@
-from collections import deque
 from functools import cache
 
 from utils import no_input_skip, read_input
 
 
-def parse_input(puzzle: str) -> deque[int]:
-    return deque(map(int, puzzle.split()))
+def parse_input(puzzle: str) -> list[int]:
+    return list(map(int, puzzle.split()))
 
 
 @cache
