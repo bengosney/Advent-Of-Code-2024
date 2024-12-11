@@ -1,4 +1,5 @@
 from collections import deque
+from functools import cache
 
 from utils import no_input_skip, read_input
 
@@ -7,48 +8,42 @@ def parse_input(puzzle: str) -> deque[int]:
     return deque(map(int, puzzle.split()))
 
 
-def blink(stones: deque[int]) -> None:
-    for _ in range(0, len(stones)):
-        if stones[0] == 0:
-            stones[0] = 1
-        elif len(str(stones[0])) % 2 == 0:
-            chars = str(stones[0])
-            middle = len(chars) // 2
-            stones[0] = int(chars[:middle])
-            stones.rotate(-1)
-            stones.insert(0, int(chars[middle:]))
-        else:
-            stones[0] = stones[0] * 2024
+@cache
+def blink(stone: int, itterations: int) -> int:
+    if itterations == 0:
+        return 1
 
-        stones.rotate(-1)
+    if stone == 0:
+        return blink(1, itterations - 1)
+    elif len(str(stone)) % 2 == 0:
+        chars = str(stone)
+        middle = len(chars) // 2
+        return blink(int(chars[:middle]), itterations - 1) + blink(int(chars[middle:]), itterations - 1)
+    else:
+        return blink(stone * 2024, itterations - 1)
 
 
 def part_1(puzzle: str) -> int:
     stones = parse_input(puzzle)
 
-    for _ in range(0, 25):
-        blink(stones)
+    total = 0
+    for stone in stones:
+        total += blink(stone, 25)
 
-    return len(stones)
+    return total
 
 
 def part_2(puzzle: str) -> int:
     stones = parse_input(puzzle)
 
-    for _ in range(0, 75):
-        blink(stones)
+    total = 0
+    for stone in stones:
+        total += blink(stone, 75)
 
-    return len(stones)
+    return total
 
 
 # -- Tests
-
-
-def test_blink() -> None:
-    stones = parse_input("0 1 10 99 999")
-
-    blink(stones)
-    assert stones == deque([1, 2024, 1, 0, 9, 9, 2021976])
 
 
 def get_example_input() -> str:
