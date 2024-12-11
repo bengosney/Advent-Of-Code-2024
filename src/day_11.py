@@ -60,10 +60,10 @@ def test_part_1_real() -> None:
     assert part_1(real_input) == 203457
 
 
-# @no_input_skip
-# def test_part_2_real() -> None:
-#     real_input = read_input(__file__)
-#     assert part_2(real_input) is not None
+@no_input_skip
+def test_part_2_real() -> None:
+    real_input = read_input(__file__)
+    assert part_2(real_input) == 241394363462435
 
 
 # -- Main
