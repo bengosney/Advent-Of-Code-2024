@@ -32,10 +32,10 @@ def get_perimeter(patch: set[complex], debug=False) -> int:
 
 
 def get_edges(patch: set[complex], debug=False) -> int:
-    left = -1 + 0j
-    right = 1 + 0j
-    up = 0 + 1j
-    down = 0 - 1j
+    left = complex(-1, 0)
+    right = complex(1, 0)
+    up = complex(0, -1)
+    down = complex(0, 1)
     checked_left = set()
     checked_right = set()
     checked_up = set()
@@ -44,38 +44,32 @@ def get_edges(patch: set[complex], debug=False) -> int:
     def walk_dir(start: complex, direction: complex, other: complex, checked: set) -> None:
         current = start
         while True:
-            if current + other not in patch:
+            if (current + other) not in patch or current in patch:
                 break
 
-            if current not in patch and current not in checked:
-                checked.add(current)
+            checked.add(current)
             current += direction
 
     edges = 0
     for pos in patch:
         if (e := pos + left) not in patch and e not in checked_left:
-            print(f"|left |{pos=} {e=} {patch=}")
             edges += 1
             walk_dir(e, down, right, checked_left)
             walk_dir(e, up, right, checked_left)
         if (e := pos + right) not in patch and e not in checked_right:
-            print(f"|right|{pos=} {e=} {patch=}")
             edges += 1
             walk_dir(e, down, left, checked_right)
             walk_dir(e, up, left, checked_right)
 
         if (e := pos + up) not in patch and e not in checked_up:
-            print(f"|up   |{pos=} {e=} {patch=}")
             edges += 1
             walk_dir(e, left, down, checked_up)
             walk_dir(e, right, down, checked_up)
         if (e := pos + down) not in patch and e not in checked_down:
-            print(f"|down |{pos=} {e=} {patch=}")
             edges += 1
             walk_dir(e, left, up, checked_down)
             walk_dir(e, right, up, checked_down)
 
-    print(f"{edges=}")
     return edges
 
 
@@ -130,11 +124,7 @@ def part_2(puzzle: str) -> int:
                     patch.add(neighbor)
                     visited.add(neighbor)
 
-        edge = get_edges(patch)
-        area = len(patch)
-        print(f"{plant=} {area} * {edge} = {area * edge}")
         cost += len(patch) * get_edges(patch)
-        # break
 
     return cost
 
@@ -177,9 +167,9 @@ OOOOO"""
     assert part_2(test_input) == 436
 
 
-# def test_part_2() -> None:
-#    test_input = get_example_input()
-#    assert part_2(test_input) == 1206
+def test_part_2() -> None:
+    test_input = get_example_input()
+    assert part_2(test_input) == 1206
 
 
 @no_input_skip
@@ -188,10 +178,10 @@ def test_part_1_real() -> None:
     assert part_1(real_input) == 1473276
 
 
-# @no_input_skip
-# def test_part_2_real() -> None:
-#     real_input = read_input(__file__)
-#     assert part_2(real_input) is not None
+@no_input_skip
+def test_part_2_real() -> None:
+    real_input = read_input(__file__)
+    assert part_2(real_input) == 901100
 
 
 # -- Main
