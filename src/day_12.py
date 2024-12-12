@@ -1,4 +1,5 @@
 from collections import defaultdict, deque
+from collections.abc import Callable
 
 from utils import no_input_skip, read_input
 
@@ -62,8 +63,7 @@ def get_edges(patch: set[complex], debug=False) -> int:
     return edges
 
 
-def part_1(puzzle: str) -> int:
-    garden = parse_input(puzzle)
+def cost_fencing(garden: dict[complex, str], method: Callable[[set[complex]], int]) -> int:
     visited = set()
 
     cost = 0
@@ -85,37 +85,20 @@ def part_1(puzzle: str) -> int:
                     patch.add(neighbor)
                     visited.add(neighbor)
 
-        cost += len(patch) * get_perimeter(patch)
-
+        cost += len(patch) * method(patch)
     return cost
+
+
+def part_1(puzzle: str) -> int:
+    garden = parse_input(puzzle)
+
+    return cost_fencing(garden, get_perimeter)
 
 
 def part_2(puzzle: str) -> int:
     garden = parse_input(puzzle)
-    visited = set()
 
-    cost = 0
-
-    for pos, cell in garden.items():
-        if pos in visited:
-            continue
-
-        plant = cell
-        patch = set([pos])
-        to_check = deque([pos])
-        while to_check:
-            current = to_check.popleft()
-            visited.add(current)
-
-            for neighbor in get_neighbors(current):
-                if garden.get(neighbor) == plant and neighbor not in visited:
-                    to_check.append(neighbor)
-                    patch.add(neighbor)
-                    visited.add(neighbor)
-
-        cost += len(patch) * get_edges(patch)
-
-    return cost
+    return cost_fencing(garden, get_edges)
 
 
 # -- Tests
