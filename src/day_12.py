@@ -34,12 +34,12 @@ def get_perimeter(patch: set[complex], debug=False) -> int:
 
 def get_edges(patch: set[complex], debug=False) -> int:
     directions = [-1 + 0j, 1 + 0j, 0 + -1j, 0 + 1j]
-    opisits = {-1 + 0j: 1 + 0j, 1 + 0j: -1 + 0j, 0 + -1j: 0 + 1j, 0 + 1j: 0 + -1j}
+    opposites = {-1 + 0j: 1 + 0j, 1 + 0j: -1 + 0j, 0 + -1j: 0 + 1j, 0 + 1j: 0 + -1j}
     walks = {
-        -1 + 0j: [0 + -1j, 0 + 1j],
-        1 + 0j: [0 + -1j, 0 + 1j],
-        0 + -1j: [-1 + 0j, 1 + 0j],
-        0 + 1j: [-1 + 0j, 1 + 0j],
+        -1 + 0j: (0 + -1j, 0 + 1j),
+        1 + 0j: (0 + -1j, 0 + 1j),
+        0 + -1j: (-1 + 0j, 1 + 0j),
+        0 + 1j: (-1 + 0j, 1 + 0j),
     }
     checked = defaultdict(set)
 
@@ -55,10 +55,11 @@ def get_edges(patch: set[complex], debug=False) -> int:
     edges = 0
     for pos in patch:
         for direction in directions:
-            if (e := pos + direction) not in patch and e not in checked[direction]:
+            adjacent = pos + direction
+            if adjacent not in patch and adjacent not in checked[direction]:
                 edges += 1
                 for walk_direction in walks[direction]:
-                    walk_dir(e, walk_direction, opisits[direction], checked[direction])
+                    walk_dir(adjacent, walk_direction, opposites[direction], checked[direction])
 
     return edges
 
