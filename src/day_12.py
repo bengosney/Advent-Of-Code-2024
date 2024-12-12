@@ -32,14 +32,15 @@ def get_perimeter(patch: set[complex], debug=False) -> int:
 
 
 def get_edges(patch: set[complex], debug=False) -> int:
-    left = complex(-1, 0)
-    right = complex(1, 0)
-    up = complex(0, -1)
-    down = complex(0, 1)
-    checked_left = set()
-    checked_right = set()
-    checked_up = set()
-    checked_down = set()
+    directions = [-1 + 0j, 1 + 0j, 0 + -1j, 0 + 1j]
+    opisits = {-1 + 0j: 1 + 0j, 1 + 0j: -1 + 0j, 0 + -1j: 0 + 1j, 0 + 1j: 0 + -1j}
+    walks = {
+        -1 + 0j: [0 + -1j, 0 + 1j],
+        1 + 0j: [0 + -1j, 0 + 1j],
+        0 + -1j: [-1 + 0j, 1 + 0j],
+        0 + 1j: [-1 + 0j, 1 + 0j],
+    }
+    checked = defaultdict(set)
 
     def walk_dir(start: complex, direction: complex, other: complex, checked: set) -> None:
         current = start
@@ -52,23 +53,11 @@ def get_edges(patch: set[complex], debug=False) -> int:
 
     edges = 0
     for pos in patch:
-        if (e := pos + left) not in patch and e not in checked_left:
-            edges += 1
-            walk_dir(e, down, right, checked_left)
-            walk_dir(e, up, right, checked_left)
-        if (e := pos + right) not in patch and e not in checked_right:
-            edges += 1
-            walk_dir(e, down, left, checked_right)
-            walk_dir(e, up, left, checked_right)
-
-        if (e := pos + up) not in patch and e not in checked_up:
-            edges += 1
-            walk_dir(e, left, down, checked_up)
-            walk_dir(e, right, down, checked_up)
-        if (e := pos + down) not in patch and e not in checked_down:
-            edges += 1
-            walk_dir(e, left, up, checked_down)
-            walk_dir(e, right, up, checked_down)
+        for direction in directions:
+            if (e := pos + direction) not in patch and e not in checked[direction]:
+                edges += 1
+                for walk_direction in walks[direction]:
+                    walk_dir(e, walk_direction, opisits[direction], checked[direction])
 
     return edges
 
