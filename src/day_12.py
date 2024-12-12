@@ -65,14 +65,12 @@ def get_edges(patch: set[complex], debug=False) -> int:
 
 def cost_fencing(garden: dict[complex, str], method: Callable[[set[complex]], int]) -> int:
     visited = set()
-
     cost = 0
 
-    for pos, cell in garden.items():
+    for pos, plant in garden.items():
         if pos in visited:
             continue
 
-        plant = cell
         patch = set([pos])
         to_check = deque([pos])
         while to_check:
