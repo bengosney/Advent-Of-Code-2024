@@ -1,7 +1,5 @@
 from collections import defaultdict, deque
 
-from icecream import ic
-
 from utils import no_input_skip, read_input
 
 
@@ -24,30 +22,61 @@ def get_neighbors(pos: complex) -> list[complex]:
 
 
 def get_perimeter(patch: set[complex], debug=False) -> int:
-    m: dict[complex, str] = defaultdict(str)
-
-    def p(*args, **kwargs):
-        if debug:
-            ic(*args, **kwargs)
-
     perimeter = 0
     for pos in patch:
-        m[pos] = "X"
-        p(f"{pos=}")
         for neighbor in get_neighbors(pos):
-            p(f"{neighbor=}")
             if neighbor not in patch:
                 perimeter += 1
-                m[neighbor] = "~"
-
-    if debug:
-        size = 10
-        for y in range(size):
-            for x in range(size):
-                print(m.get(complex(x, y), " "), end="")
-            print()
 
     return perimeter
+
+
+def get_edges(patch: set[complex], debug=False) -> int:
+    left = -1 + 0j
+    right = 1 + 0j
+    up = 0 + 1j
+    down = 0 - 1j
+    checked_left = set()
+    checked_right = set()
+    checked_up = set()
+    checked_down = set()
+
+    def walk_dir(start: complex, direction: complex, other: complex, checked: set) -> None:
+        current = start
+        while True:
+            if current + other not in patch:
+                break
+
+            if current not in patch and current not in checked:
+                checked.add(current)
+            current += direction
+
+    edges = 0
+    for pos in patch:
+        if (e := pos + left) not in patch and e not in checked_left:
+            print(f"|left |{pos=} {e=} {patch=}")
+            edges += 1
+            walk_dir(e, down, right, checked_left)
+            walk_dir(e, up, right, checked_left)
+        if (e := pos + right) not in patch and e not in checked_right:
+            print(f"|right|{pos=} {e=} {patch=}")
+            edges += 1
+            walk_dir(e, down, left, checked_right)
+            walk_dir(e, up, left, checked_right)
+
+        if (e := pos + up) not in patch and e not in checked_up:
+            print(f"|up   |{pos=} {e=} {patch=}")
+            edges += 1
+            walk_dir(e, left, down, checked_up)
+            walk_dir(e, right, down, checked_up)
+        if (e := pos + down) not in patch and e not in checked_down:
+            print(f"|down |{pos=} {e=} {patch=}")
+            edges += 1
+            walk_dir(e, left, up, checked_down)
+            walk_dir(e, right, up, checked_down)
+
+    print(f"{edges=}")
+    return edges
 
 
 def part_1(puzzle: str) -> int:
@@ -73,15 +102,41 @@ def part_1(puzzle: str) -> int:
                     patch.add(neighbor)
                     visited.add(neighbor)
 
-        # perimeter = get_perimeter(patch)
-        # print(f"{plant=} {len(patch)=} {perimeter=} = {len(patch) * perimeter}")
         cost += len(patch) * get_perimeter(patch)
 
     return cost
 
 
 def part_2(puzzle: str) -> int:
-    pass
+    garden = parse_input(puzzle)
+    visited = set()
+
+    cost = 0
+
+    for pos, cell in garden.items():
+        if pos in visited:
+            continue
+
+        plant = cell
+        patch = set([pos])
+        to_check = deque([pos])
+        while to_check:
+            current = to_check.popleft()
+            visited.add(current)
+
+            for neighbor in get_neighbors(current):
+                if garden.get(neighbor) == plant and neighbor not in visited:
+                    to_check.append(neighbor)
+                    patch.add(neighbor)
+                    visited.add(neighbor)
+
+        edge = get_edges(patch)
+        area = len(patch)
+        print(f"{plant=} {area} * {edge} = {area * edge}")
+        cost += len(patch) * get_edges(patch)
+        # break
+
+    return cost
 
 
 # -- Tests
@@ -105,9 +160,26 @@ def test_part_1() -> None:
     assert part_1(test_input) == 1930
 
 
+def test_part_2_1() -> None:
+    test_input = """AAAA
+BBCD
+BBCC
+EEEC"""
+    assert part_2(test_input) == 80
+
+
+def test_part_2_2() -> None:
+    test_input = """OOOOO
+OXOXO
+OOOOO
+OXOXO
+OOOOO"""
+    assert part_2(test_input) == 436
+
+
 # def test_part_2() -> None:
-#     test_input = get_example_input()
-#     assert part_2(test_input) is not None
+#    test_input = get_example_input()
+#    assert part_2(test_input) == 1206
 
 
 @no_input_skip
