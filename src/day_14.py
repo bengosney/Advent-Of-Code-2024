@@ -2,6 +2,7 @@ import re
 from collections import defaultdict
 from dataclasses import dataclass
 from functools import cached_property
+from itertools import count
 from math import prod
 
 from utils import no_input_skip, read_input
@@ -17,6 +18,9 @@ class Robot:
     def move(self, extents: "Extent"):
         self.x = (self.x + self.vx) % extents.x
         self.y = (self.y + self.vy) % extents.y
+
+    def complex(self) -> complex:
+        return complex(self.x, self.y)
 
 
 @dataclass(frozen=True)
@@ -81,8 +85,18 @@ def part_1(puzzle: str, extents: Extent = Extent(101, 103)) -> int:
     return prod(quadrants.values())
 
 
-def part_2(puzzle: str, extents: complex = complex(101, 103)) -> int:
-    pass
+def part_2(puzzle: str, extents: Extent = Extent(101, 103)) -> int:
+    robots = parse_input(puzzle)
+    robot_count = len(robots)
+
+    for i in count():
+        positions = set()
+        for robot in robots:
+            robot.move(extents)
+            positions.add(robot.complex())
+
+        if len(positions) == robot_count:
+            return i + 1
 
 
 # -- Tests
@@ -108,21 +122,16 @@ def test_part_1() -> None:
     assert part_1(test_input, Extent(11, 7)) == 12
 
 
-# def test_part_2() -> None:
-#     test_input = get_example_input()
-#     assert part_2(test_input) is not None
-
-
 @no_input_skip
 def test_part_1_real() -> None:
     real_input = read_input(__file__)
     assert part_1(real_input) == 208437768
 
 
-# @no_input_skip
-# def test_part_2_real() -> None:
-#     real_input = read_input(__file__)
-#     assert part_2(real_input) is not None
+@no_input_skip
+def test_part_2_real() -> None:
+    real_input = read_input(__file__)
+    assert part_2(real_input) == 7492
 
 
 # -- Main
