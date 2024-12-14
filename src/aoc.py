@@ -78,22 +78,25 @@ def time_it(day: str, iterations: int = 1, progress: Callable[..., Any] = lambda
     return mean(times[1]), mean(times[2])
 
 
+def list_to_days(days: list[DayType]) -> list[str]:
+    if not days:
+        return [p.name.replace(".py", "") for p in list(Path("./src").glob("day_*.py"))]
+    return [d.value for d in days]
+
+
 @app.command()
-def benchmark(iterations: int = 10, days: list[str] = []) -> None:
+def benchmark(iterations: int = 10, days: list[DayType] = []) -> None:
     table = Table(title=f"AOC 2023 - Timings\n({iterations:,} iterations)")
 
     table.add_column("Day", justify="center", style="bold")
     table.add_column("Part 1", justify="right")
     table.add_column("Part 2", justify="right")
 
-    if not days:
-        _days = [p.name.replace(".py", "") for p in list(Path("./src").glob("day_*.py"))]
-    else:
-        _days = [str(d) for d in days]
+    day_names = list_to_days(days)
 
     with Progress(transient=True) as progress:
-        task = progress.add_task("Running code", total=(len(_days) * 2) * iterations)
-        for day in sorted(_days):
+        task = progress.add_task("Running code", total=(len(day_names) * 2) * iterations)
+        for day in sorted(day_names):
             p1, p2 = time_it(day, iterations, lambda: progress.update(task, advance=1))
 
             _, d = day.split("_")
@@ -129,27 +132,22 @@ def run_day(day: str, progress: Callable[..., Any] = lambda: None) -> tuple[floa
     return part_1, part_2
 
 
-def day_from_name(file_name: str) -> int:
-    return int(file_name.replace(".py", "").replace("day_", ""))
-
-
 @app.command()
-def answers(days: list[int] = []) -> None:
+def answers(days: list[DayType] = []) -> None:
     table = Table(title="Advent of Code 2023 - Answers")
 
     table.add_column("Day", justify="center", style="bold")
-    table.add_column("Part 1", justify="left")
-    table.add_column("Part 2", justify="left")
+    table.add_column("Part 1", justify="right")
+    table.add_column("Part 2", justify="right")
 
-    if not days:
-        days = [day_from_name(p.name) for p in list(Path("./src").glob("day_*.py"))]
+    day_names = list_to_days(days)
 
     with Progress(transient=True) as progress:
-        task = progress.add_task("Running code", total=(len(days) * 2))
-        for d in sorted(days):
-            p1, p2 = run_day(f"day_{d:02}", lambda: progress.update(task, advance=1))
+        task = progress.add_task("Running code", total=(len(day_names) * 2))
+        for day in sorted(day_names):
+            p1, p2 = run_day(day, lambda: progress.update(task, advance=1))
 
-            table.add_row(f"{int(d)}", f"{p1}", f"{p2}")
+            table.add_row(f"{int(day.split("_")[1])}", f"{p1}", f"{p2}")
 
     with Console() as console:
         console.print(table)
