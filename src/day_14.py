@@ -19,8 +19,14 @@ class Robot:
         self.x = (self.x + self.vx) % extents.x
         self.y = (self.y + self.vy) % extents.y
 
-    def complex(self) -> complex:
-        return complex(self.x, self.y)
+    def __hash__(self) -> int:
+        return self.x + (self.y << 16)
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, Robot):
+            return NotImplemented
+
+        return self.x == other.x and self.y == other.y
 
 
 @dataclass(frozen=True)
@@ -79,7 +85,7 @@ def part_2(puzzle: str, extents: Extent = Extent(101, 103)) -> int:
         positions = set()
         for robot in robots:
             robot.move(extents)
-            positions.add(robot.complex())
+            positions.add(robot)
 
         if len(positions) == robot_count:
             return i + 1
