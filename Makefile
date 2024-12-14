@@ -96,7 +96,8 @@ mypy: $(ALLDAYS)
 pytest: src/*.py
 	pytest $^
 
-test: pytest mypy
+test: .direnv pytest.ini
+	ptw --runner "pytest --testmon" --onfail "notify-send \"Failed\"" --onpass "notify-send \"Passed\"" src/day_*.py
 
 pytest.ini: # this is a hack, otherwise ptw will try to read toml and fail
 	touch $@
