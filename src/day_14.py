@@ -81,14 +81,14 @@ def part_2(puzzle: str, extents: Extent = Extent(101, 103)) -> int:
     robots = parse_input(puzzle)
     robot_count = len(robots)
 
-    for i in count():
+    for i in count(1):
         positions = set()
         for robot in robots:
             robot.move(extents)
             positions.add(robot)
 
         if len(positions) == robot_count:
-            return i + 1
+            return i
 
     raise ImposibleError()
 
