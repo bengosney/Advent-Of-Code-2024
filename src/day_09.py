@@ -9,12 +9,12 @@ Block = int | Literal["."]
 
 
 def parse_input(puzzle: str) -> list[Block]:
-    blocks = []
+    blocks: list[Block] = []
     id = 0
     is_file = True
     for size in puzzle.strip():
-        value = id if is_file else "."
-        blocks.extend([value] * int(size))
+        value: Block = id if is_file else "."
+        blocks.extend([value for _ in range(int(size))])
         if is_file:
             id += 1
         is_file = not is_file

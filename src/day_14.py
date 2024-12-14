@@ -63,7 +63,7 @@ def part_1(puzzle: str, extents: Extent = Extent(101, 103)) -> int:
         for robot in robots:
             robot.move(extents)
 
-    quadrants = defaultdict(int)
+    quadrants: dict[int, int] = defaultdict(int)
     for robot in robots:
         quadrants[extents.quadrant(robot)] += 1
     del quadrants[0]

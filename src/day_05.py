@@ -2,21 +2,24 @@ from collections.abc import Iterable
 
 from utils import no_input_skip, read_input
 
+Rule = tuple[int, int]
+Pages = list[int]
 
-def process_input(puzzle: str) -> tuple[Iterable[tuple[int, int]], Iterable[list[int]]]:
+
+def process_input(puzzle: str) -> tuple[Iterable[Rule], Iterable[Pages]]:
     ordering, pages = puzzle.strip().split("\n\n")
 
-    ordering_rules: Iterable[tuple[int, int]] = []
+    ordering_rules: list[tuple[int, int]] = []
     for pair in ordering.split("\n"):
         rules = pair.split("|")
         ordering_rules.append((int(rules[0]), int(rules[1])))
 
-    pages = [[int(page) for page in row.split(",")] for row in pages.strip().split("\n")]
+    processed_pages: list[Pages] = [[int(page) for page in row.split(",")] for row in pages.strip().split("\n")]
 
-    return ordering_rules, pages
+    return ordering_rules, processed_pages
 
 
-def in_order(ordering: Iterable[tuple[int, int]], pages: list[int]) -> bool:
+def in_order(ordering: Iterable[Rule], pages: Pages) -> bool:
     for pos, page in enumerate(pages):
         for pair in ordering:
             if page == pair[1] and pair[0] in pages[pos + 1 :]:
@@ -24,12 +27,12 @@ def in_order(ordering: Iterable[tuple[int, int]], pages: list[int]) -> bool:
     return True
 
 
-def filter_orderings(ordering: Iterable[tuple[int, int]], pages: list[int]) -> list[tuple[int, int]]:
+def filter_orderings(ordering: Iterable[Rule], pages: Pages) -> list[tuple[int, int]]:
     pages_set = set(pages)
     return [pair for pair in ordering if pair[0] in pages_set and pair[1] in pages_set]
 
 
-def reorder(ordering: Iterable[tuple[int, int]], pages: list[int]) -> list[int]:
+def reorder(ordering: Iterable[Rule], pages: Pages) -> Pages:
     while not in_order(ordering, pages):
         for pos, page in enumerate(pages):
             for pair in ordering:

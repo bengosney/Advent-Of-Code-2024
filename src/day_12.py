@@ -41,7 +41,7 @@ def get_edges(patch: set[complex], debug=False) -> int:
         0 + -1j: (-1 + 0j, 1 + 0j),
         0 + 1j: (-1 + 0j, 1 + 0j),
     }
-    checked = defaultdict(set)
+    checked: dict[complex, set[complex]] = defaultdict(set)
 
     def walk_dir(start: complex, direction: complex, other: complex, checked: set) -> None:
         current = start
