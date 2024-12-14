@@ -5,7 +5,7 @@ from functools import cached_property
 from itertools import count
 from math import prod
 
-from utils import no_input_skip, read_input
+from utils import ImposibleError, no_input_skip, read_input
 
 
 @dataclass
@@ -83,6 +83,8 @@ def part_2(puzzle: str, extents: Extent = Extent(101, 103)) -> int:
 
         if len(positions) == robot_count:
             return i + 1
+
+    raise ImposibleError()
 
 
 # -- Tests

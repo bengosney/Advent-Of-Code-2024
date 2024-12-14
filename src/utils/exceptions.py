@@ -1,0 +1,2 @@
+class ImposibleError(Exception):
+    pass
