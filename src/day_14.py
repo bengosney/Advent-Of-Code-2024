@@ -29,32 +29,18 @@ class Extent:
     y: int
 
     @cached_property
-    def lower_x(self) -> int:
+    def half_x(self) -> int:
         return self.x // 2
 
     @cached_property
-    def upper_x(self) -> int:
-        return self.lower_x + 1
-
-    @cached_property
-    def lower_y(self) -> int:
+    def half_y(self) -> int:
         return self.y // 2
 
-    @cached_property
-    def upper_y(self) -> int:
-        return self.lower_y + 1
-
     def quadrant(self, robot: Robot) -> int:
-        if robot.x < self.lower_x and robot.y < self.lower_y:
-            return 1
-        elif robot.x > self.lower_x and robot.y < self.lower_y:
-            return 2
-        elif robot.x < self.lower_x and robot.y > self.lower_y:
-            return 3
-        elif robot.x > self.lower_x and robot.y > self.lower_y:
-            return 4
-        else:
+        if robot.x == self.half_x or robot.y == self.half_y:
             return 0
+
+        return (1 if robot.x < self.half_x else 2) + (4 if robot.y > self.half_y else 8)
 
 
 def parse_input(puzzle: str) -> list[Robot]:
