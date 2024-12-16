@@ -1,73 +1,74 @@
 from collections import defaultdict
 from heapq import heappop, heappush
+from math import inf
 
 import pytest
 
 from utils import no_input_skip, read_input
 
-Point = tuple[int, int]
 
-
-def parse_input(puzzle: str) -> tuple[set[Point], Point, Point]:
+def parse_input(puzzle: str) -> tuple[set[complex], complex, complex]:
     walls = set()
 
     for y, line in enumerate(puzzle.split("\n")):
         for x, cell in enumerate(line):
             if cell == "#":
-                walls.add((x, y))
+                walls.add(complex(x, y))
             elif cell == "S":
-                start = (x, y)
+                start = complex(x, y)
             elif cell == "E":
-                end = (x, y)
+                end = complex(x, y)
     return walls, start, end
 
 
-def solve_maze(walls: set[Point], start: Point, end: Point) -> tuple[int, int]:
-    directions = [(0, -1), (1, 0), (0, 1), (-1, 0)]
-    queue: list[tuple[int, int, int, int, int, set[tuple[int, int]]]] = []
-    heappush(queue, (0, start[0], start[1], 1, 0, set()))
+def solve_maze(walls: set[complex], start: complex, end: complex) -> tuple[int, int]:
+    directions = [complex(0, -1), complex(1, 0), complex(0, 1), complex(-1, 0)]
+    queue: list[tuple[int, float, float, float, float, set[complex]]] = []
+    heappush(queue, (0, start.real, start.imag, 1, 0, set()))
 
-    best_score: int = 9_999_999
-    scores_history: dict[int, set[Point]] = defaultdict(set)
-    visited: dict[tuple[int, int, int, int], int] = {}
+    best_score = inf
+    scores_history: dict[int, set[complex]] = defaultdict(set)
+    visited: dict[tuple[complex, complex], int] = {}
 
     while queue:
         score, x, y, dx, dy, history = heappop(queue)
+        position = complex(x, y)
+        direction = complex(dx, dy)
 
         if score > best_score:
             continue
 
-        visited[(x, y, dx, dy)] = score
+        visited[(position, direction)] = score
 
-        if (x, y) == end:
+        if position == end:
             best_score = min(best_score, score)
             scores_history[score] |= history
 
-        for ndx, ndy in directions:
-            (npx, npy) = (x + ndx, y + ndy)
-            if (npx, npy) in history or (npx, npy) in walls:
+        for next_direction in directions:
+            next_position = position + next_direction
+            if next_position in history or next_position in walls:
                 continue
 
             next_score = score + 1
-            if (ndx, ndy) != (dx, dy):
+            if next_direction != direction:
                 next_score += 1000
 
-            if (npx, npy, ndx, ndy) in visited and visited[(npx, npy, ndx, ndy)] < next_score:
+            if (next_position, next_direction) in visited and visited[(next_position, next_direction)] < next_score:
                 continue
 
             heappush(
                 queue,
                 (
                     next_score,
-                    npx,
-                    npy,
-                    ndx,
-                    ndy,
-                    history | {(x, y)},
+                    next_position.real,
+                    next_position.imag,
+                    next_direction.real,
+                    next_direction.imag,
+                    history | {position},
                 ),
             )
 
-    return best_score, len(scores_history[best_score]) + 1
+    return int(best_score), len(scores_history[int(best_score)]) + 1
 
 
 def part_1(puzzle: str) -> int:
