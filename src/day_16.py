@@ -1,4 +1,7 @@
+from collections import defaultdict
 from heapq import heappop, heappush
+
+import pytest
 
 from utils import no_input_skip, read_input
 
@@ -19,48 +22,69 @@ def parse_input(puzzle: str) -> tuple[set[Point], Point, Point]:
     return walls, start, end
 
 
-def part_1(puzzle: str) -> int:
-    walls, start, end = parse_input(puzzle)
-
+def solve_maze(walls: set[Point], start: Point, end: Point) -> tuple[int, int]:
     directions = [(0, -1), (1, 0), (0, 1), (-1, 0)]
     queue: list[tuple[int, int, int, int, int, set[tuple[int, int]]]] = []
     heappush(queue, (0, start[0], start[1], 1, 0, set()))
-    scores: list = []
 
-    seen = set()
+    best_score: int = 9_999_999
+    scores_history: dict[int, set[Point]] = defaultdict(set)
+    visited: dict[tuple[Point, Point], int] = {}
 
-    itterations = 0
     while queue:
-        itterations += 1
         score, x, y, dx, dy, history = heappop(queue)
-        print(f"{score=}, {x=}, {y=}, {dx=}, {dy=}")
         current_direction = (dx, dy)
         pos = (x, y)
-        if pos in walls or pos in seen:
+
+        if score > best_score:
+            continue
+        if (pos, current_direction) in visited and visited[(pos, current_direction)] < score:
             continue
 
-        seen.add(pos)
+        visited[(pos, current_direction)] = score
 
         if pos == end:
-            scores.append(score)
-            continue
+            best_score = min(best_score, score)
+            scores_history[score] |= history
 
-        for direction in directions:
-            next_pos = (x + direction[0], y + direction[1])
-            if next_pos in history or next_pos in walls:
+        for next_direction in directions:
+            next_pos = (x + next_direction[0], y + next_direction[1])
+            if next_pos in history or next_pos in walls or next_pos in visited:
                 continue
 
             next_score = score + 1
-            if direction != current_direction:
+            if next_direction != current_direction:
                 next_score += 1000
 
-            heappush(queue, (next_score, next_pos[0], next_pos[1], direction[0], direction[1], history | {pos}))
+            heappush(
+                queue,
+                (
+                    next_score,
+                    next_pos[0],
+                    next_pos[1],
+                    next_direction[0],
+                    next_direction[1],
+                    history | {pos},
+                ),
+            )
 
-    return min(scores)
+    return best_score, len(scores_history[best_score]) + 1
+
+
+def part_1(puzzle: str) -> int:
+    walls, start, end = parse_input(puzzle)
+
+    score, _ = solve_maze(walls, start, end)
+
+    return score
 
 
 def part_2(puzzle: str) -> int:
-    pass
+    walls, start, end = parse_input(puzzle)
+
+    _, history = solve_maze(walls, start, end)
+
+    return history
 
 
 # -- Tests
@@ -110,21 +134,23 @@ def test_part_1_2() -> None:
     assert part_1(test_input) == 11048
 
 
-# def test_part_2() -> None:
-#     test_input = get_example_input()
-#     assert part_2(test_input) is not None
+def test_part_2() -> None:
+    test_input = get_example_input()
+    assert part_2(test_input) == 45
 
 
 @no_input_skip
+@pytest.mark.slow
 def test_part_1_real() -> None:
     real_input = read_input(__file__)
     assert part_1(real_input) == 115500
 
 
-# @no_input_skip
-# def test_part_2_real() -> None:
-#     real_input = read_input(__file__)
-#     assert part_2(real_input) is not None
+@no_input_skip
+@pytest.mark.slow
+def test_part_2_real() -> None:
+    real_input = read_input(__file__)
+    assert part_2(real_input) == 679
 
 
 # -- Main
