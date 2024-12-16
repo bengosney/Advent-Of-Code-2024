@@ -29,42 +29,41 @@ def solve_maze(walls: set[Point], start: Point, end: Point) -> tuple[int, int]:
 
     best_score: int = 9_999_999
     scores_history: dict[int, set[Point]] = defaultdict(set)
-    visited: dict[tuple[Point, Point], int] = {}
+    visited: dict[tuple[int, int, int, int], int] = {}
 
     while queue:
         score, x, y, dx, dy, history = heappop(queue)
-        current_direction = (dx, dy)
-        pos = (x, y)
 
         if score > best_score:
             continue
-        if (pos, current_direction) in visited and visited[(pos, current_direction)] < score:
-            continue
 
-        visited[(pos, current_direction)] = score
+        visited[(x, y, dx, dy)] = score
 
-        if pos == end:
+        if (x, y) == end:
             best_score = min(best_score, score)
             scores_history[score] |= history
 
-        for next_direction in directions:
-            next_pos = (x + next_direction[0], y + next_direction[1])
-            if next_pos in history or next_pos in walls or next_pos in visited:
+        for ndx, ndy in directions:
+            (npx, npy) = (x + ndx, y + ndy)
+            if (npx, npy) in history or (npx, npy) in walls:
                 continue
 
             next_score = score + 1
-            if next_direction != current_direction:
+            if (ndx, ndy) != (dx, dy):
                 next_score += 1000
+
+            if (npx, npy, ndx, ndy) in visited and visited[(npx, npy, ndx, ndy)] < next_score:
+                continue
 
             heappush(
                 queue,
                 (
                     next_score,
-                    next_pos[0],
-                    next_pos[1],
-                    next_direction[0],
-                    next_direction[1],
-                    history | {pos},
+                    npx,
+                    npy,
+                    ndx,
+                    ndy,
+                    history | {(x, y)},
                 ),
             )
 
