@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-from utils import no_input_skip, read_input  # noqa: F401
+from utils import no_input_skip, read_input
 
 
 def parse_input(puzzle: str) -> tuple[dict[str, int], list[int]]:
@@ -118,28 +118,28 @@ def test_run_program_5() -> None:
     assert registers["B"] == 44354
 
 
-def get_example_input() -> str:
-    return """Register A: 729
+def test_part_1() -> None:
+    test_input = """Register A: 729
 Register B: 0
 Register C: 0
 
 Program: 0,1,5,4,3,0"""
-
-
-def test_part_1() -> None:
-    test_input = get_example_input()
     assert part_1(test_input) == "4,6,3,5,6,3,5,2,1,0"
 
 
-# def test_part_2() -> None:
-#     test_input = get_example_input()
-#     assert part_2(test_input) is not None
+def test_part_2() -> None:
+    test_input = """Register A: 2024
+Register B: 0
+Register C: 0
+
+Program: 0,3,5,4,3,0"""
+    assert part_2(test_input) == 117440
 
 
-# @no_input_skip
-# def test_part_1_real() -> None:
-#     real_input = read_input(__file__)
-#     assert part_1(real_input) is not None
+@no_input_skip
+def test_part_1_real() -> None:
+    real_input = read_input(__file__)
+    assert part_1(real_input) == "4,6,1,4,2,1,3,1,6"
 
 
 # @no_input_skip
