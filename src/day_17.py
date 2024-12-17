@@ -1,9 +1,9 @@
-from collections import defaultdict, deque
+from collections import defaultdict
 
 from utils import no_input_skip, read_input  # noqa: F401
 
 
-def parse_input(puzzle: str) -> tuple[dict[str, int], deque[int]]:
+def parse_input(puzzle: str) -> tuple[dict[str, int], list[int]]:
     raw_registers, raw_program = puzzle.split("\n\n")
     registers = defaultdict(int)
     program = []
@@ -12,16 +12,12 @@ def parse_input(puzzle: str) -> tuple[dict[str, int], deque[int]]:
         register, value = line.split(": ")
         registers[register.split(" ")[1]] = int(value)
 
-    program = deque([int(line) for line in raw_program.split(" ")[1].split(",")])
+    program = [int(line) for line in raw_program.split(" ")[1].split(",")]
 
     return registers, program
 
 
-def part_1(puzzle: str) -> int:  # noqa: C901
-    registers, program = parse_input(puzzle)
-
-    program = deque([0, 1, 2, 3])
-
+def run_program(registers: dict[str, int], program: list[int]) -> list[int]:  # noqa: C901
     def op(operand) -> int:
         match operand:
             case 0 | 1 | 2 | 3:
@@ -37,27 +33,42 @@ def part_1(puzzle: str) -> int:  # noqa: C901
             case _:
                 raise ValueError(operand)
 
-    for _ in range(len(program)):
-        ins = program[0]
-        program.rotate(-1)
-        match ins:
-            case 0:  # adv
-                value = op(program[0])
-                program.rotate(-1)
-                registers["A"] = int(registers["A"] / (2**value))
-            case 1:  # bxl
-                value = op(program[0])
-                program.rotate(-1)
-                registers["B"] = registers["B"] | value
-            case 2:  # bst
-                value = op(program[0])
-                registers["B"] = value % 8
-            case 3:  # jnz
-                pass
-            case _:
-                print("Unknown instruction")
+    output = []
 
-    print(registers)
+    ptr = 0
+    while ptr < len(program):
+        match program[ptr]:
+            case 0:  # adv
+                registers["A"] = registers["A"] // (2 ** op(program[ptr + 1]))
+            case 1:  # bxl
+                registers["B"] ^= program[ptr + 1]
+            case 2:  # bst
+                registers["B"] = op(program[ptr + 1]) % 8
+            case 3:  # jnz
+                if registers["A"] != 0:
+                    ptr = program[ptr + 1]
+                    continue
+            case 4:  # bxc
+                registers["B"] ^= registers["C"]
+            case 5:  # out
+                output.append(op(program[ptr + 1]) % 8)
+            case 6:  # bdv
+                registers["B"] = registers["A"] // (2 ** op(program[ptr + 1]))
+            case 7:  # cdv
+                registers["C"] = registers["A"] // (2 ** op(program[ptr + 1]))
+            case _:
+                raise NotImplementedError(program[ptr])
+        ptr += 2
+
+    return output
+
+
+def part_1(puzzle: str) -> str:
+    registers, program = parse_input(puzzle)
+
+    output = run_program(registers, program)
+
+    return ",".join(map(str, output))
 
 
 def part_2(puzzle: str) -> int:
@@ -65,6 +76,46 @@ def part_2(puzzle: str) -> int:
 
 
 # -- Tests
+
+
+def test_run_program_1() -> None:
+    registers = {"A": 0, "B": 0, "C": 9}
+    program = [2, 6]
+
+    run_program(registers, program)
+
+    assert registers["B"] == 1
+
+
+def test_run_program_2() -> None:
+    registers = {"A": 10, "B": 0, "C": 0}
+    program = [5, 0, 5, 1, 5, 4]
+
+    assert run_program(registers, program) == [0, 1, 2]
+
+
+def test_run_program_3() -> None:
+    registers = {"A": 2024, "B": 0, "C": 0}
+    program = [0, 1, 5, 4, 3, 0]
+
+    assert run_program(registers, program) == [4, 2, 5, 6, 7, 7, 7, 7, 3, 1, 0]
+    assert registers["A"] == 0
+
+
+def test_run_program_4() -> None:
+    registers = {"A": 0, "B": 29, "C": 0}
+    program = [1, 7]
+
+    run_program(registers, program)
+    assert registers["B"] == 26
+
+
+def test_run_program_5() -> None:
+    registers = {"A": 0, "B": 2024, "C": 43690}
+    program = [4, 0]
+
+    run_program(registers, program)
+    assert registers["B"] == 44354
 
 
 def get_example_input() -> str:
@@ -77,7 +128,7 @@ Program: 0,1,5,4,3,0"""
 
 def test_part_1() -> None:
     test_input = get_example_input()
-    assert part_1(test_input) == 4635635210
+    assert part_1(test_input) == "4,6,3,5,6,3,5,2,1,0"
 
 
 # def test_part_2() -> None:
