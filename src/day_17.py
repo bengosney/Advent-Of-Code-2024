@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict, deque
 
 from utils import no_input_skip, read_input
 
@@ -72,7 +72,20 @@ def part_1(puzzle: str) -> str:
 
 
 def part_2(puzzle: str) -> int:
-    pass
+    registers, program = parse_input(puzzle)
+
+    queue = deque([(0, 1)])
+    while queue:
+        register_a, n = queue.popleft()
+        if n > len(program):
+            return register_a
+
+        for i in range(8):
+            next_a = (register_a * 8) + i
+            result = run_program({**registers, "A": next_a}, program)
+
+            if result == program[-n:]:
+                queue.append((next_a, n + 1))
 
 
 # -- Tests
