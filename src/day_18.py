@@ -1,10 +1,6 @@
 from heapq import heappop, heappush
 
-from utils import no_input_skip, read_input
-
-
-class NoSolutionError(Exception):
-    pass
+from utils import NoSolutionError, no_input_skip, read_input
 
 
 class NoPathError(Exception):

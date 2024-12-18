@@ -1,6 +1,6 @@
 from collections import defaultdict, deque
 
-from utils import no_input_skip, read_input
+from utils import NoSolutionError, no_input_skip, read_input
 
 
 def parse_input(puzzle: str) -> tuple[dict[str, int], list[int]]:
@@ -86,6 +86,8 @@ def part_2(puzzle: str) -> int:
 
             if result == program[-n:]:
                 queue.append((next_a, n + 1))
+
+    raise NoSolutionError()
 
 
 # -- Tests
