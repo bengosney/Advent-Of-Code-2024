@@ -1,4 +1,5 @@
 from collections import defaultdict, deque
+from functools import partial
 
 from utils import NoSolutionError, no_input_skip, read_input
 
@@ -17,45 +18,42 @@ def parse_input(puzzle: str) -> tuple[dict[str, int], list[int]]:
     return registers, program
 
 
+def op(operand, registers) -> int:
+    register_map = {4: "A", 5: "B", 6: "C"}
+    match operand:
+        case 0 | 1 | 2 | 3:
+            return operand
+        case 4 | 5 | 6:
+            return registers[register_map[operand]]
+        case _:
+            raise ValueError(operand)
+
+
 def run_program(registers: dict[str, int], program: list[int]) -> list[int]:  # noqa: C901
-    def op(operand) -> int:
-        match operand:
-            case 0 | 1 | 2 | 3:
-                return operand
-            case 4:
-                return registers["A"]
-            case 5:
-                return registers["B"]
-            case 6:
-                return registers["C"]
-            case 7:
-                raise NotImplementedError
-            case _:
-                raise ValueError(operand)
-
     output = []
-
     ptr = 0
+    getop = partial(op, registers=registers)
     while ptr < len(program):
+        opcode = program[ptr + 1]
         match program[ptr]:
             case 0:  # adv
-                registers["A"] = registers["A"] // (2 ** op(program[ptr + 1]))
+                registers["A"] = registers["A"] // (2 ** getop(opcode))
             case 1:  # bxl
-                registers["B"] ^= program[ptr + 1]
+                registers["B"] ^= opcode
             case 2:  # bst
-                registers["B"] = op(program[ptr + 1]) % 8
+                registers["B"] = getop(opcode) % 8
             case 3:  # jnz
                 if registers["A"] != 0:
-                    ptr = program[ptr + 1]
+                    ptr = opcode
                     continue
             case 4:  # bxc
                 registers["B"] ^= registers["C"]
             case 5:  # out
-                output.append(op(program[ptr + 1]) % 8)
+                output.append(getop(opcode) % 8)
             case 6:  # bdv
-                registers["B"] = registers["A"] // (2 ** op(program[ptr + 1]))
+                registers["B"] = registers["A"] // (2 ** getop(opcode))
             case 7:  # cdv
-                registers["C"] = registers["A"] // (2 ** op(program[ptr + 1]))
+                registers["C"] = registers["A"] // (2 ** getop(opcode))
             case _:
                 raise NotImplementedError(program[ptr])
         ptr += 2
