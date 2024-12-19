@@ -9,17 +9,18 @@ def parse_input(puzzle: str) -> tuple[set[str], list[str]]:
     return set(towels.split(", ")), patterns.split("\n")
 
 
-def solve_pattern(towels: set[str], pattern: str) -> bool:
+def solve_pattern(towels: set[str], pattern: str) -> int:
     @cache
-    def solve(pattern: str) -> bool:
+    def solve(pattern: str) -> int:
+        ways = 0
         for towel in towels:
             if pattern.startswith(towel):
                 if len(towel) == len(pattern):
-                    return True
-                if solve(pattern[len(towel) :]):
-                    return True
+                    ways += 1
+                    continue
+                ways += solve(pattern[len(towel) :])
 
-        return False
+        return ways
 
     return solve(pattern)
 
@@ -31,7 +32,9 @@ def part_1(puzzle: str) -> int:
 
 
 def part_2(puzzle: str) -> int:
-    pass
+    towels, patterns = parse_input(puzzle)
+
+    return sum(solve_pattern(towels, pattern) for pattern in patterns)
 
 
 # -- Tests
@@ -55,9 +58,9 @@ def test_part_1() -> None:
     assert part_1(test_input) == 6
 
 
-# def test_part_2() -> None:
-#     test_input = get_example_input()
-#     assert part_2(test_input) is not None
+def test_part_2() -> None:
+    test_input = get_example_input()
+    assert part_2(test_input) == 16
 
 
 @no_input_skip
@@ -66,10 +69,10 @@ def test_part_1_real() -> None:
     assert part_1(real_input) == 293
 
 
-# @no_input_skip
-# def test_part_2_real() -> None:
-#     real_input = read_input(__file__)
-#     assert part_2(real_input) is not None
+@no_input_skip
+def test_part_2_real() -> None:
+    real_input = read_input(__file__)
+    assert part_2(real_input) == 623924810770264
 
 
 # -- Main
