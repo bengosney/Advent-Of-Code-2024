@@ -1,5 +1,4 @@
 from collections import defaultdict
-from functools import lru_cache
 from itertools import combinations
 
 import pytest
@@ -7,7 +6,7 @@ import pytest
 from utils import no_input_skip, read_input
 
 
-def parse_input(puzzle: str) -> list[complex]:
+def parse_input(puzzle: str) -> list[tuple[int, int]]:
     track: set[complex] = set()
     start = complex(0, 0)
     end = complex(0, 0)
@@ -27,22 +26,18 @@ def parse_input(puzzle: str) -> list[complex]:
                 path.append(step)
                 break
 
-    return path
+    return [(int(p.real), int(p.imag)) for p in path]
 
 
-@lru_cache
-def manhattan_distance(a: complex, b: complex) -> int:
-    return int(abs(a.real - b.real) + abs(a.imag - b.imag))
-
-
-def count_cheets(path: list[complex], max_skip: int, min_skip: int) -> dict[int, int]:
+def count_cheets(path: list[tuple[int, int]], max_skip: int, min_skip: int) -> dict[int, int]:
     cheats = defaultdict(int)
     index_map = {point: index for index, point in enumerate(path)}
     for a, b in combinations(path, 2):
-        if (distance := manhattan_distance(a, b)) <= max_skip:
-            diff = (index_map[b] - index_map[a]) - distance
-            if diff > 0:
-                cheats[diff] += 1
+        if (steps := (index_map[b] - index_map[a])) >= min_skip:
+            if (distance := abs(a[0] - b[0]) + abs(a[1] - b[1])) <= max_skip:
+                diff = steps - distance
+                if diff > 0:
+                    cheats[diff] += 1
 
     return cheats
 
