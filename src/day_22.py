@@ -5,30 +5,14 @@ import pytest
 from utils import no_input_skip, read_input
 
 
-def mix(n1: int, n2: int) -> int:
-    return n1 ^ n2
-
-
-def prune(n: int) -> int:
-    return n % 16777216
-
-
-def mix_prune(n1: int, n2: int) -> int:
-    return prune(mix(n1, n2))
-
-
 def secret_number(seed: int) -> int:
     number = seed
 
-    number = mix_prune(number * 64, number)
-    number = mix_prune(number // 32, number)
-    number = mix_prune(number * 2048, number)
+    number = (number ^ (number * 64)) % 16777216
+    number = (number ^ (number // 32)) % 16777216
+    number = (number ^ (number * 2048)) % 16777216
 
     return number
-
-
-def cost(number: int) -> int:
-    return number % 10
 
 
 def part_1(puzzle: str) -> int:
@@ -50,10 +34,10 @@ def part_2(puzzle: str) -> int:
         sequences = {}
         changes = deque(maxlen=4)
         number = start
-        previous = cost(start)
+        previous = start % 10
         for _ in range(2000):
             number = secret_number(number)
-            number_cost = cost(number)
+            number_cost = number % 10
             changes.append(number_cost - previous)
             if len(changes) == 4 and tuple(changes) not in sequences:
                 sequences[tuple(changes)] = number_cost
@@ -75,14 +59,6 @@ def test_secret_number() -> None:
     for result in results:
         assert secret_number(seed) == result
         seed = result
-
-
-def test_mix() -> None:
-    assert mix(42, 15) == 37
-
-
-def test_prune() -> None:
-    assert prune(100000000) == 16113920
 
 
 def get_example_input() -> str:
