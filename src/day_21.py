@@ -1,4 +1,4 @@
-from heapq import heappop, heappush
+from collections import deque
 from typing import Literal, Self, cast
 
 import pytest
@@ -23,9 +23,9 @@ class Keypad:
         print("init keypad")
         self.x, self.y = self.key_map["A"]
 
-    def press_key(self, key: KeypadKeys) -> list[DirectionKeys]:
+    def press_key(self, key: KeypadKeys) -> list[list[DirectionKeys]]:
         end_x, end_y = self.key_map[key]
-        queue: list[tuple[int, int, int, list[DirectionKeys]]] = []
+        queue: deque[tuple[int, int, int, list[DirectionKeys]]] = deque()
         visited: set[tuple[int, int]] = set()
         valid_positions: set[tuple[int, int]] = set(self.key_map.values())
         neighbours: list[tuple[DirectionKeys, int, int]] = [
@@ -35,14 +35,16 @@ class Keypad:
             ("<", -1, 0),
         ]
 
-        heappush(queue, (0, self.x, self.y, []))
+        paths = []
+
+        queue.append((0, self.x, self.y, []))
         while queue:
-            dist, x, y, history = heappop(queue)
+            dist, x, y, history = queue.popleft()
             if (x, y) == (end_x, end_y):
                 self.x, self.y = end_x, end_y
                 print("-")
                 print(f"Keypad {key}: {[*history, "A"]}")
-                return [*history, "A"]
+                paths.append([*history, "A"])
             if (x, y) in visited:
                 continue
             visited.add((x, y))
@@ -55,9 +57,9 @@ class Keypad:
                         score = DirectionPad.move_cost(history[-1], dir)
                     except IndexError:
                         score = DirectionPad.move_cost("A", dir)
-                    heappush(queue, (dist + score, next_x, next_y, [*history, dir]))
+                    queue.append((dist + score, next_x, next_y, [*history, dir]))
 
-        raise NoSolutionError()
+        return paths
 
 
 class DirectionPad:
@@ -74,7 +76,7 @@ class DirectionPad:
         self.x, self.y = self.key_map["A"]
         self.cost = cost
 
-    def press_key(self, key: KeypadKeys) -> list[DirectionKeys]:
+    def press_key(self, key: KeypadKeys) -> list[list[DirectionKeys]]:
         moves = self.next_pad.press_key(key)
         my_moves = []
         for move in moves:
@@ -82,9 +84,9 @@ class DirectionPad:
 
         return my_moves
 
-    def move_to(self, key: DirectionKeys) -> list[DirectionKeys]:
+    def move_to(self, key: DirectionKeys) -> list[list[DirectionKeys]]:
         end_x, end_y = self.key_map[key]
-        queue: list[tuple[int, int, int, list[DirectionKeys]]] = []
+        queue: deque[tuple[int, int, int, list[DirectionKeys]]] = deque()
         visited: set[tuple[int, int]] = set()
         valid_positions: set[tuple[int, int]] = set(self.key_map.values())
         neighbours: list[tuple[DirectionKeys, int, int]] = [
@@ -94,16 +96,18 @@ class DirectionPad:
             ("^", 0, -1),
         ]
 
-        heappush(queue, (0, self.x, self.y, []))
+        paths = []
+
+        queue.append((0, self.x, self.y, []))
         while queue:
-            dist, x, y, history = heappop(queue)
+            dist, x, y, history = queue.popleft()
             if (x, y) == (end_x, end_y):
                 self.x, self.y = end_x, end_y
                 if self.cost:
                     print(f"DirPad {key}: {[*history, 'A']} {dist}")
                 else:
                     print(f"MeePad {key}: {[*history, 'A']} {dist}")
-                return [*history, "A"]
+                paths.append([*history, "A"])
             if (x, y) in visited:
                 continue
             visited.add((x, y))
@@ -119,9 +123,9 @@ class DirectionPad:
                             score = DirectionPad.move_cost("A", dir)
                     else:
                         score = 1
-                    heappush(queue, (dist + score, next_x, next_y, [*history, dir]))
+                    queue.append((dist + score, next_x, next_y, [*history, dir]))
 
-        raise NoSolutionError()
+        return paths
 
     @staticmethod
     def move_cost(start: DirectionKeys, end: DirectionKeys) -> int:
