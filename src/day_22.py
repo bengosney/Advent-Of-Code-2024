@@ -1,3 +1,7 @@
+from collections import defaultdict, deque
+
+import pytest
+
 from utils import no_input_skip, read_input
 
 
@@ -23,11 +27,15 @@ def secret_number(seed: int) -> int:
     return number
 
 
+def cost(number: int) -> int:
+    return number % 10
+
+
 def part_1(puzzle: str) -> int:
     numbers = []
 
-    for line in map(int, puzzle.splitlines()):
-        number = line
+    for start in map(int, puzzle.splitlines()):
+        number = start
         for _ in range(2000):
             number = secret_number(number)
         numbers.append(number)
@@ -36,7 +44,25 @@ def part_1(puzzle: str) -> int:
 
 
 def part_2(puzzle: str) -> int:
-    pass
+    bananas = defaultdict(int)
+
+    for start in map(int, puzzle.splitlines()):
+        sequences = {}
+        changes = deque(maxlen=4)
+        number = start
+        previous = cost(start)
+        for _ in range(2000):
+            number = secret_number(number)
+            number_cost = cost(number)
+            changes.append(number_cost - previous)
+            if len(changes) == 4 and tuple(changes) not in sequences:
+                sequences[tuple(changes)] = number_cost
+            previous = number_cost
+
+        for sequence, banana in sequences.items():
+            bananas[sequence] += banana
+
+    return max(bananas.values())
 
 
 # -- Tests
@@ -71,9 +97,12 @@ def test_part_1() -> None:
     assert part_1(test_input) == 37327623
 
 
-# def test_part_2() -> None:
-#     test_input = get_example_input()
-#     assert part_2(test_input) is not None
+def test_part_2() -> None:
+    test_input = """1
+2
+3
+2024"""
+    assert part_2(test_input) == 23
 
 
 @no_input_skip
@@ -82,10 +111,11 @@ def test_part_1_real() -> None:
     assert part_1(real_input) == 19241711734
 
 
-# @no_input_skip
-# def test_part_2_real() -> None:
-#     real_input = read_input(__file__)
-#     assert part_2(real_input) is not None
+@no_input_skip
+@pytest.mark.slow()
+def test_part_2_real() -> None:
+    real_input = read_input(__file__)
+    assert part_2(real_input) == 2058
 
 
 # -- Main
