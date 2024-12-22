@@ -1,4 +1,4 @@
-from collections import defaultdict, deque
+from collections import defaultdict
 
 import pytest
 
@@ -32,14 +32,14 @@ def part_2(puzzle: str) -> int:
 
     for start in map(int, puzzle.splitlines()):
         sequences = {}
-        changes = deque(maxlen=4)
+        changes = []
         number = start
         previous = start % 10
-        for _ in range(2000):
+        for i in range(2000):
             number = secret_number(number)
             number_cost = number % 10
-            changes.append(number_cost - previous)
-            if len(changes) == 4 and tuple(changes) not in sequences:
+            changes = [*changes[-3:], number_cost - previous]
+            if i >= 3 and tuple(changes) not in sequences:
                 sequences[tuple(changes)] = number_cost
             previous = number_cost
 
