@@ -1,166 +1,106 @@
-from collections import deque
-from typing import Literal, Self, cast
+from heapq import heappop, heappush
+from typing import Literal
 
 import pytest
+from icecream import ic
 
 from utils import NoSolutionError, no_input_skip, read_input  # noqa: F401
 
 KeypadKeys = Literal["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A"]
 DirectionKeys = Literal["<", ">", "^", "v", "A"]
+Point = tuple[int, int]
+Keypad = dict[Point, KeypadKeys] | dict[Point, DirectionKeys]
+
+# fmt: off
+numeric_keypad: dict[Point, KeypadKeys] = {
+    (0, 0): '7', (1, 0): '8', (2, 0): '9',
+    (0, 1): '4', (1, 1): '5', (2, 1): '6',
+    (0, 2): '1', (1, 2): '2', (2, 2): '3',
+    (1, 3): '0', (2, 3): 'A'
+}
+# fmt: on
+numeric_keypad_reversed = {v: k for k, v in numeric_keypad.items()}
+ic(numeric_keypad_reversed)
+
+# fmt: off
+directional_keypad: dict[Point, DirectionKeys] = {
+    (1, 0): '^', (2, 0): 'A',
+    (0, 1): '<', (1, 1): 'v', (2, 1): '>'
+}
+# fmt: on
+directional_keypad_reversed = {v: k for k, v in directional_keypad.items()}
+
+directions = [
+    (0, -1, "^"),
+    (0, 1, "v"),
+    (-1, 0, "<"),
+    (1, 0, ">"),
+]
 
 
-class Keypad:
-    # fmt: off
-    key_map: dict[KeypadKeys | None, tuple[int, int]] = {  # noqa: RUF012
-        "7": (0, 0), "8": (1, 0), "9": (2, 0),
-        "4": (0, 1), "5": (1, 1), "6": (2, 1),
-        "1": (0, 2), "2": (1, 2), "3": (2, 2),
-                     "0": (1, 3), "A": (2, 3),
-    }
-    # fmt: on
-
-    def __init__(self) -> None:
-        print("init keypad")
-        self.x, self.y = self.key_map["A"]
-
-    def press_key(self, key: KeypadKeys) -> list[list[DirectionKeys]]:
-        end_x, end_y = self.key_map[key]
-        queue: deque[tuple[int, int, int, list[DirectionKeys]]] = deque()
-        visited: set[tuple[int, int]] = set()
-        valid_positions: set[tuple[int, int]] = set(self.key_map.values())
-        neighbours: list[tuple[DirectionKeys, int, int]] = [
-            ("v", 0, 1),
-            ("^", 0, -1),
-            (">", 1, 0),
-            ("<", -1, 0),
-        ]
-
-        paths = []
-
-        queue.append((0, self.x, self.y, []))
-        while queue:
-            dist, x, y, history = queue.popleft()
-            if (x, y) == (end_x, end_y):
-                self.x, self.y = end_x, end_y
-                print("-")
-                print(f"Keypad {key}: {[*history, "A"]}")
-                paths.append([*history, "A"])
-            if (x, y) in visited:
-                continue
-            visited.add((x, y))
-
-            for dir, d_x, d_y in neighbours:
-                next_x = x + d_x
-                next_y = y + d_y
-                if (next_x, next_y) in valid_positions:
-                    try:
-                        score = DirectionPad.move_cost(history[-1], dir)
-                    except IndexError:
-                        score = DirectionPad.move_cost("A", dir)
-                    queue.append((dist + score, next_x, next_y, [*history, dir]))
-
-        return paths
+def score_move(start: Point, end: Point) -> int:
+    return abs(start[0] - end[0]) + abs(start[1] - end[1])
 
 
-class DirectionPad:
-    # fmt: off
-    key_map: dict[DirectionKeys | None, tuple[int, int]] = {  # noqa: RUF012
-                      "^": (1, 0), "A": (2, 0),
-         "<": (0, 1), "v": (1, 1), ">": (2, 1),
-    }
-    # fmt: on
+def find_path(start: Point, end: Point, keypad: Keypad):
+    queue = []
+    heappush(queue, (0, start[0], start[1], ""))
+    visited = {start}
 
-    def __init__(self, pad: Self | Keypad, cost: bool) -> None:
-        print("init direction pad")
-        self.next_pad = pad
-        self.x, self.y = self.key_map["A"]
-        self.cost = cost
+    while queue:
+        dist, x, y, path = heappop(queue)
 
-    def press_key(self, key: KeypadKeys) -> list[list[DirectionKeys]]:
-        moves = self.next_pad.press_key(key)
-        my_moves = []
-        for move in moves:
-            my_moves.extend(self.move_to(move))
+        if (x, y) == end:
+            return path
 
-        return my_moves
-
-    def move_to(self, key: DirectionKeys) -> list[list[DirectionKeys]]:
-        end_x, end_y = self.key_map[key]
-        queue: deque[tuple[int, int, int, list[DirectionKeys]]] = deque()
-        visited: set[tuple[int, int]] = set()
-        valid_positions: set[tuple[int, int]] = set(self.key_map.values())
-        neighbours: list[tuple[DirectionKeys, int, int]] = [
-            ("<", -1, 0),
-            (">", 1, 0),
-            ("v", 0, 1),
-            ("^", 0, -1),
-        ]
-
-        paths = []
-
-        queue.append((0, self.x, self.y, []))
-        while queue:
-            dist, x, y, history = queue.popleft()
-            if (x, y) == (end_x, end_y):
-                self.x, self.y = end_x, end_y
-                if self.cost:
-                    print(f"DirPad {key}: {[*history, 'A']} {dist}")
-                else:
-                    print(f"MeePad {key}: {[*history, 'A']} {dist}")
-                paths.append([*history, "A"])
-            if (x, y) in visited:
-                continue
-            visited.add((x, y))
-
-            for dir, d_x, d_y in neighbours:
-                next_x = x + d_x
-                next_y = y + d_y
-                if (next_x, next_y) in valid_positions:
-                    if self.cost:
-                        try:
-                            score = DirectionPad.move_cost(history[-1], dir)
-                        except IndexError:
-                            score = DirectionPad.move_cost("A", dir)
-                    else:
-                        score = 1
-                    queue.append((dist + score, next_x, next_y, [*history, dir]))
-
-        return paths
-
-    @staticmethod
-    def move_cost(start: DirectionKeys, end: DirectionKeys) -> int:
-        a = DirectionPad.key_map[start]
-        b = DirectionPad.key_map[end]
-        return abs(a[0] - b[0]) + abs(a[1] - b[1])
+        for dx, dy, move in directions:
+            nx, ny = x + dx, y + dy
+            if (nx, ny) in keypad and (nx, ny) not in visited:
+                try:
+                    score = 1 if move == path[-1] else 2
+                except IndexError:
+                    score = 1
+                heappush(queue, (dist + score, nx, ny, path + move))
+                visited.add((nx, ny))
+    raise NoSolutionError()
 
 
-def parse_input(puzzle: str) -> list[list[str]]:
-    return list(map(list, puzzle.splitlines()))
+def get_code_path(code: str) -> str:
+    current_pos = numeric_keypad_reversed["A"]
+    path = ""
+    for digit in code:
+        target_pos = numeric_keypad_reversed[digit]
+        path += find_path(current_pos, target_pos, numeric_keypad) + "A"
+        current_pos = target_pos
+    return path
 
 
-def init_chain() -> DirectionPad:
-    print("init chain")
-    keypad = Keypad()
-    direction_pad_1 = DirectionPad(keypad, True)
-    direction_pad_2 = DirectionPad(direction_pad_1, False)
-    return direction_pad_2
+def get_directional_path(code_path: str) -> str:
+    current_pos = (2, 0)
+    path = ""
+    for move in code_path:
+        target_pos = directional_keypad_reversed[move]
+        path += find_path(current_pos, target_pos, directional_keypad) + "A"
+        current_pos = target_pos
+    return path
+
+
+def get_move_list(code: str) -> str:
+    numeric_path = get_code_path(code)
+    directional_path_1 = get_directional_path(numeric_path)
+    directional_path_2 = get_directional_path(directional_path_1)
+    return directional_path_2
 
 
 def part_1(puzzle: str) -> int:
-    codes = parse_input(puzzle)
+    codes = puzzle.splitlines()
+    total_complexity = 0
 
-    complexities = []
     for code in codes:
-        direction_pad = init_chain()
-        all_moves = 0
-        for key in code:
-            moves = direction_pad.press_key(cast(KeypadKeys, key))
-            all_moves += len(moves)
+        moves = get_move_list(code)
+        total_complexity += len(moves) * int(code[:-1])
 
-        print(f"{"".join(code)}: {all_moves} * {int("".join(code[:-1]))}")
-        complexities.append(all_moves * int("".join(code[:-1])))
-
-    return sum(complexities)
+    return total_complexity
 
 
 def part_2(puzzle: str) -> int:
@@ -194,18 +134,9 @@ def test_part_1() -> None:
     ],
 )
 def test_single_code(test_input, expected):
-    direction_pad = init_chain()
-    total = 0
-    all_moves = []
-    for c in test_input:
-        moves = direction_pad.press_key(c)
-        all_moves.extend(moves)
-        all_moves.append("|")
-        total += len(moves)
+    moves = get_move_list(test_input)
 
-    print(f"{test_input}: {''.join(all_moves)}")
-    print("    : <v<A>>^AvA^A|<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A")
-    assert total == expected
+    assert len(moves) == expected
 
 
 # def test_379A():
@@ -222,10 +153,7 @@ def test_single_code(test_input, expected):
 
 
 def test_keypad() -> None:
-    keypad = Keypad()
-    moves = []
-    for key in "029A":
-        moves.extend(keypad.press_key(key))
+    moves = get_code_path("029A")
     assert "".join(moves) in ["<A^A>^^AvvvA", "<A^A^>^AvvvA", "<A^A^^>AvvvA"]
 
 
