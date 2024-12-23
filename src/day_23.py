@@ -1,6 +1,8 @@
 from collections import defaultdict
 from itertools import combinations
 
+import pytest
+
 from utils import no_input_skip, read_input
 
 
@@ -36,8 +38,24 @@ def part_1(puzzle: str) -> int:
     return posible_found
 
 
-def part_2(puzzle: str) -> int:
-    pass
+def part_2(puzzle: str) -> str:
+    graph = map_input(puzzle)
+    checked: set[str] = set()
+
+    biggest_group = frozenset()
+
+    for looking_at, nodes in graph.items():
+        if any(node in checked for node in nodes):
+            continue
+
+        for i in range(2, len(nodes) + 1):
+            for others in combinations(nodes, i):
+                if all(a in graph[b] for a, b in combinations(others, 2)):
+                    new_group = frozenset([looking_at, *others])
+                    if len(new_group) > len(biggest_group):
+                        biggest_group = new_group
+
+    return ",".join(sorted(biggest_group))
 
 
 # -- Tests
@@ -83,9 +101,9 @@ def test_part_1() -> None:
     assert part_1(test_input) == 7
 
 
-# def test_part_2() -> None:
-#     test_input = get_example_input()
-#     assert part_2(test_input) is not None
+def test_part_2() -> None:
+    test_input = get_example_input()
+    assert part_2(test_input) == "co,de,ka,ta"
 
 
 @no_input_skip
@@ -94,10 +112,11 @@ def test_part_1_real() -> None:
     assert part_1(real_input) == 1330
 
 
-# @no_input_skip
-# def test_part_2_real() -> None:
-#     real_input = read_input(__file__)
-#     assert part_2(real_input) is not None
+@no_input_skip
+@pytest.mark.slow
+def test_part_2_real() -> None:
+    real_input = read_input(__file__)
+    assert part_2(real_input) == "hl,io,ku,pk,ps,qq,sh,tx,ty,wq,xi,xj,yp"
 
 
 # -- Main
