@@ -1,6 +1,6 @@
 from itertools import product
 
-from utils import no_input_skip, read_input  # noqa: F401
+from utils import no_input_skip, read_input
 
 Lock = list[int]
 Key = list[int]
@@ -11,15 +11,9 @@ def parse_input(puzzle: str) -> tuple[list[Key], list[Lock]]:
     locks = []
 
     for data in puzzle.split("\n\n"):
-        item = []
-        data_lines = data.splitlines()
-        for i in range(len(data_lines[0])):
-            col = []
-            for j in range(len(data_lines)):
-                col.append(1 if data_lines[j][i] == "#" else 0)  # noqa: PERF401
-            item.append(sum(col) - 1)
-
-        if all(i == "#" for i in data[0]):
+        lines = data.splitlines()
+        item = [sum(int(lines[j][i] == "#") for j in range(len(lines))) - 1 for i in range(len(lines[0]))]
+        if data.startswith("#"):
             keys.append(item)
         else:
             locks.append(item)
@@ -128,10 +122,10 @@ def test_part_1() -> None:
 #     assert part_2(test_input) is not None
 
 
-# @no_input_skip
-# def test_part_1_real() -> None:
-#     real_input = read_input(__file__)
-#     assert part_1(real_input) is not None
+@no_input_skip
+def test_part_1_real() -> None:
+    real_input = read_input(__file__)
+    assert part_1(real_input) == 3508
 
 
 # @no_input_skip
