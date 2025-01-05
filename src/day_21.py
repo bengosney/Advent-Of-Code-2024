@@ -4,7 +4,7 @@ from typing import Literal
 import pytest
 from icecream import ic
 
-from utils import NoSolutionError, no_input_skip, read_input  # noqa: F401
+from utils import NoSolutionError, no_input_skip, read_input
 
 KeypadKeys = Literal["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A"]
 DirectionKeys = Literal["<", ">", "^", "v", "A"]
@@ -31,10 +31,10 @@ directional_keypad: dict[Point, DirectionKeys] = {
 directional_keypad_reversed = {v: k for k, v in directional_keypad.items()}
 
 directions = [
-    (0, -1, "^"),
-    (0, 1, "v"),
-    (-1, 0, "<"),
-    (1, 0, ">"),
+    (-1, 0, "<", 1),
+    (0, -1, "^", 2),
+    (0, 1, "v", 3),
+    (1, 0, ">", 4),
 ]
 
 
@@ -43,25 +43,20 @@ def score_move(start: Point, end: Point) -> int:
 
 
 def find_path(start: Point, end: Point, keypad: Keypad):
-    queue = []
-    heappush(queue, (0, start[0], start[1], ""))
-    visited = {start}
+    queue: list[tuple[int, int, int, str, set[Point]]] = []
+    heappush(queue, (0, start[0], start[1], "", {start}))
 
     while queue:
-        dist, x, y, path = heappop(queue)
+        dist, x, y, path, visited = heappop(queue)
 
         if (x, y) == end:
             return path
 
-        for dx, dy, move in directions:
-            nx, ny = x + dx, y + dy
-            if (nx, ny) in keypad and (nx, ny) not in visited:
-                try:
-                    score = 1 if move == path[-1] else 2
-                except IndexError:
-                    score = 1
-                heappush(queue, (dist + score, nx, ny, path + move))
-                visited.add((nx, ny))
+        for dir_x, dir_y, move, cost in directions:
+            new_x, new_y = x + dir_x, y + dir_y
+            if (new_x, new_y) in keypad and (new_x, new_y) not in visited:
+                score = cost if move == (path or "n")[-1] else cost * 2
+                heappush(queue, (dist + score, new_x, new_y, path + move, {*visited, (new_x, new_y)}))
     raise NoSolutionError()
 
 
@@ -139,17 +134,20 @@ def test_single_code(test_input, expected):
     assert len(moves) == expected
 
 
-# def test_379A():
-#     direction_pad = init_chain()
-#     test_input = "379A"
-#     total = 0
-#     all_moves = []
-#     for c in test_input:
-#         moves = direction_pad.press_key(c)
-#         all_moves.extend(moves)
-#         total += len(moves)
-#
-#     assert "".join(all_moves) == "<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A"
+@pytest.mark.parametrize(
+    "test_input,expected",
+    [
+        ("382A", 68),  # fail
+        ("176A", 74),  # fail
+        ("463A", 70),
+        ("083A", 66),  # fail
+        ("789A", 66),
+    ],
+)
+def test_real_single_code(test_input, expected):
+    moves = get_move_list(test_input)
+
+    assert len(moves) == expected
 
 
 def test_keypad() -> None:
@@ -162,10 +160,10 @@ def test_keypad() -> None:
 #     assert part_2(test_input) is not None
 
 
-# @no_input_skip
-# def test_part_1_real() -> None:
-#     real_input = read_input(__file__)
-#     assert part_1(real_input) is not None
+@no_input_skip
+def test_part_1_real() -> None:
+    real_input = read_input(__file__)
+    assert part_1(real_input) == 128962
 
 
 # @no_input_skip
