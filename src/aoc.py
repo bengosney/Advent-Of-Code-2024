@@ -46,11 +46,12 @@ class DayType(str, Enum):
     DAY_18 = "day_18"
     DAY_19 = "day_19"
     DAY_20 = "day_20"
+    DAY_21 = "day_21"
     DAY_22 = "day_22"
     DAY_23 = "day_23"
     DAY_24 = "day_24"
     DAY_25 = "day_25"
-    # [[[end]]] (checksum: 2f57ecf5d26fa486a50cf81da7e453cf)
+    # [[[end]]] (checksum: 04b39e2f173693b4e01bbb7a22291090)
 
 
 class SortType(str, Enum):
