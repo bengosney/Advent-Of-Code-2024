@@ -1,4 +1,5 @@
-from collections.abc import Generator
+from collections import UserDict
+from collections.abc import Generator, Mapping
 from functools import cache
 from heapq import heappop, heappush
 from itertools import pairwise
@@ -9,7 +10,7 @@ import pytest
 from utils import NoSolutionError, no_input_skip, read_input
 
 
-class FixedHashableDict(dict):
+class KeypadDict(UserDict):
     def __init__(self, id: str, *args, **kwargs):
         self._hash = hash(id)
         super().__init__(*args, **kwargs)
@@ -21,17 +22,17 @@ class FixedHashableDict(dict):
 KeypadKeys = Literal["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "A"]
 DirectionKeys = Literal["<", ">", "^", "v", "A"]
 Point = tuple[int, int]
-Keypad = dict[KeypadKeys, Point] | dict[DirectionKeys, Point]
+Keypad = Mapping[KeypadKeys, Point] | Mapping[DirectionKeys, Point]
 
 # fmt: off
-numeric_keypad: dict[KeypadKeys, Point] = FixedHashableDict('numeric', {
+numeric_keypad: UserDict[KeypadKeys, Point] = KeypadDict('numeric', {
     '7': (0, 0), '8': (1, 0), '9':(2, 0),
     '4': (0, 1), '5': (1, 1), '6':(2, 1),
     '1': (0, 2), '2': (1, 2), '3':(2, 2),
     '0': (1, 3), 'A': (2, 3)
 })
 
-directional_keypad: dict[DirectionKeys, Point] = FixedHashableDict('directional', {
+directional_keypad: UserDict[DirectionKeys, Point] = KeypadDict('directional', {
     '^': (1, 0), 'A': (2, 0),
     '<': (0, 1), 'v': (1, 1), '>': (2, 1),
 })
