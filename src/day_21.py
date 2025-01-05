@@ -64,16 +64,16 @@ def find_paths(start: Point, end: Point, keypad: Keypad) -> Generator[str, None,
 
 
 @cache
-def get_path_between(start: str, end: str, keypad: Keypad, keypad_count: int) -> str:
+def get_path_between(start: str, end: str, keypad: Keypad, keypad_count: int) -> int:
     if not keypad_count:
-        return "A"
+        return 1
 
     paths = []
     shortest_path = None
     for path in find_paths(keypad[start], keypad[end], keypad):
         got_path = get_path(directional_keypad, path, keypad_count - 1)
         paths.append(got_path)
-        if shortest_path is None or len(got_path) < len(shortest_path):
+        if shortest_path is None or got_path < shortest_path:
             shortest_path = got_path
 
     if shortest_path is None:
@@ -83,15 +83,11 @@ def get_path_between(start: str, end: str, keypad: Keypad, keypad_count: int) ->
 
 
 @cache
-def get_path(keypad: Keypad, code: str, keypad_count: int) -> str:
-    path = ""
+def get_path(keypad: Keypad, code: str, keypad_count: int) -> int:
+    path: int = 0
     for a, b in pairwise("A" + code):
         path += get_path_between(a, b, keypad, keypad_count)
     return path
-
-
-def get_move_list(code: str) -> str:
-    return get_path(numeric_keypad, code, 3)
 
 
 def part_1(puzzle: str) -> int:
@@ -100,7 +96,7 @@ def part_1(puzzle: str) -> int:
 
     for code in codes:
         moves = get_path(numeric_keypad, code, 3)
-        total_complexity += len(moves) * int(code[:-1])
+        total_complexity += moves * int(code[:-1])
 
     return total_complexity
 
@@ -111,7 +107,7 @@ def part_2(puzzle: str) -> int:
 
     for code in codes:
         moves = get_path(numeric_keypad, code, 26)
-        total_complexity += len(moves) * int(code[:-1])
+        total_complexity += moves * int(code[:-1])
 
     return total_complexity
 
@@ -143,9 +139,9 @@ def test_part_1() -> None:
     ],
 )
 def test_single_code(test_input, expected):
-    moves = get_move_list(test_input)
+    moves = get_path(numeric_keypad, test_input, 3)
 
-    assert len(moves) == expected
+    assert moves == expected
 
 
 @pytest.mark.parametrize(
@@ -159,9 +155,9 @@ def test_single_code(test_input, expected):
     ],
 )
 def test_real_single_code(test_input, expected):
-    moves = get_move_list(test_input)
+    moves = get_path(numeric_keypad, test_input, 3)
 
-    assert len(moves) == expected
+    assert moves == expected
 
 
 @no_input_skip
@@ -173,7 +169,7 @@ def test_part_1_real() -> None:
 @no_input_skip
 def test_part_2_real() -> None:
     real_input = read_input(__file__)
-    assert part_2(real_input) == 33033749109056
+    assert part_2(real_input) == 159684145150108
 
 
 # -- Main
