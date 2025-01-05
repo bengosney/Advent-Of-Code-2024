@@ -13,6 +13,7 @@ jobs:
         with:
           userid: ${{ secrets.USERID }}
           session: ${{ secrets.AOC_SESSION }}
+          year: 2024
           
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
