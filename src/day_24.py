@@ -77,11 +77,16 @@ def part_2(puzzle: str) -> str:
             wrong.add(output)
             continue
 
-        if output[0] != "z" and a[0] not in ["x", "y"] and b[0] not in ["x", "y"] and op == "XOR":
+        if output[0] != "z" and a[0] != "x" and a[0] != "y" and b[0] != "x" and b[0] != "y" and op == "XOR":
             wrong.add(output)
             continue
 
-        if op == "XOR" and ((a[0] == "x" and b[0] == "y") or (a[0] == "y" and b[0] == "x")) and output[0] != "z":
+        if (
+            op == "XOR"
+            and ((a[0] == "x" and b[0] == "y") or (a[0] == "y" and b[0] == "x"))
+            and int(a[1:]) != 0
+            and int(b[1:]) != 0
+        ):
             for sa, sop, sb, _ in rules.values():
                 if sop == "XOR" and output in [sa, sb]:
                     break
@@ -89,7 +94,12 @@ def part_2(puzzle: str) -> str:
                 wrong.add(output)
             continue
 
-        if op == "AND" and ((a[0] == "x" and b[0] == "y") or (a[0] == "y" and b[0] == "x")) and output[0] != "z":
+        if (
+            op == "AND"
+            and ((a[0] == "x" and b[0] == "y") or (a[0] == "y" and b[0] == "x"))
+            and int(a[1:]) != 0
+            and int(b[1:]) != 0
+        ):
             for sa, sop, sb, _ in rules.values():
                 if sop == "OR" and output in [sa, sb]:
                     break
