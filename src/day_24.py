@@ -67,8 +67,37 @@ def part_1(puzzle: str) -> int:
     return int("".join(map(lambda x: str(int(x)), result)), 2)
 
 
-def part_2(puzzle: str) -> int:
-    pass
+def part_2(puzzle: str) -> str:
+    _, rules = parse_input(puzzle)
+
+    max_z = max([int(w[1:]) for _, _, _, w in rules.values() if w[0] == "z"])
+    wrong: set[Wire] = set()
+    for a, op, b, output in rules.values():
+        if output[0] == "z" and int(output[1:]) != max_z and op != "XOR":
+            wrong.add(output)
+            continue
+
+        if output[0] != "z" and a[0] not in ["x", "y"] and b[0] not in ["x", "y"] and op == "XOR":
+            wrong.add(output)
+            continue
+
+        if op == "XOR" and ((a[0] == "x" and b[0] == "y") or (a[0] == "y" and b[0] == "x")) and output[0] != "z":
+            for sa, sop, sb, _ in rules.values():
+                if sop == "XOR" and output in [sa, sb]:
+                    break
+            else:
+                wrong.add(output)
+            continue
+
+        if op == "AND" and ((a[0] == "x" and b[0] == "y") or (a[0] == "y" and b[0] == "x")) and output[0] != "z":
+            for sa, sop, sb, _ in rules.values():
+                if sop == "OR" and output in [sa, sb]:
+                    break
+            else:
+                wrong.add(output)
+            continue
+
+    return ",".join(sorted(wrong))
 
 
 # -- Tests
@@ -148,21 +177,16 @@ def test_part_1(test_input, expected) -> None:
     assert part_1(test_input) == expected
 
 
-# def test_part_2() -> None:
-#     test_input = get_example_input()
-#     assert part_2(test_input) is not None
-
-
 @no_input_skip
 def test_part_1_real() -> None:
     real_input = read_input(__file__)
     assert part_1(real_input) == 51715173446832
 
 
-# @no_input_skip
-# def test_part_2_real() -> None:
-#     real_input = read_input(__file__)
-#     assert part_2(real_input) is not None
+@no_input_skip
+def test_part_2_real() -> None:
+    real_input = read_input(__file__)
+    assert part_2(real_input) == "dpg,kmb,mmf,tvp,vdk,z10,z15,z25"
 
 
 # -- Main
