@@ -196,5 +196,6 @@ poetry.toml
 .testmondata*
 cookies.txt
 .install.state
-/*.txt
+/cookies.txt
 pytest.ini
+report/*.html

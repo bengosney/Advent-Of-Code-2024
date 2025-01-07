@@ -13,8 +13,9 @@ jobs:
         with:
           userid: ${{ secrets.USERID }}
           session: ${{ secrets.AOC_SESSION }}
+          year: 2024
           
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
-          commit_message: Update badges
+          commit_message: "docs(readme): update badges"
           file_pattern: README.md
