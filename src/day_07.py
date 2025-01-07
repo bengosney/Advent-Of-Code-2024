@@ -25,10 +25,9 @@ def is_valid(calibration: Calibration, operators: list[Callable]) -> bool:
     values = calibration.test_values
     answer = calibration.answer
 
-    for calculated in calculate(values[1:], operators):
-        if answer in [op(calculated, values[0]) for op in operators]:
-            return True
-    return False
+    return any(
+        answer in [op(calculated, values[0]) for op in operators] for calculated in calculate(values[1:], operators)
+    )
 
 
 def parse_input(puzzle: str) -> Iterable[Calibration]:

@@ -9,15 +9,15 @@ Point = tuple[int, int]
 
 
 def puzzle_to_map(puzzle: str) -> tuple[dict[Point, str], Point]:
-    map = {}
+    puzzle_map = {}
     start = (-1, -1)
     for y, line in enumerate(puzzle.splitlines()):
         for x, cell in enumerate(line):
             if cell == "^":
                 start = (x, y)
-            map[(x, y)] = "." if cell == "^" else cell
+            puzzle_map[(x, y)] = "." if cell == "^" else cell
 
-    return map, start
+    return puzzle_map, start
 
 
 class LoopingError(Exception):
@@ -35,8 +35,7 @@ def walk_path(map: dict[Point, str], start: Point) -> set[Point]:
                 raise LoopingError()
             seen_directions.add((directions[0], position))
             next_position = (position[0] + directions[0][0], position[1] + directions[0][1])
-            next = map[next_position]
-            if next == "#":
+            if map[next_position] == "#":
                 directions.rotate(-1)
             else:
                 position = next_position
@@ -76,7 +75,7 @@ def part_2(puzzle: str) -> int:
 
 
 def test_looping_error():
-    input = """....#.....
+    puzzle = """....#.....
 ....+---+#
 ....|...|.
 ..#.|...|.
@@ -86,7 +85,7 @@ def test_looping_error():
 ........#.
 #.........
 ......#..."""
-    map, position = puzzle_to_map(input)
+    map, position = puzzle_to_map(puzzle)
     with pytest.raises(LoopingError):
         walk_path(map, position)
 

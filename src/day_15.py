@@ -108,18 +108,19 @@ def parse_input(puzzle: str, double_wide: bool = False) -> tuple[Warehouse, list
     for y, line in enumerate(warehouse.splitlines()):
         for x, cell in enumerate(line):
             pos = complex(x * mul, y)
-            if cell == "@":
-                robot = pos
-            elif cell == "O":
-                boxes.append(pos)
-                if double_wide:
-                    boxes.append(pos + 1)
-                    box_links[pos + 1] = pos
-                    box_links[pos] = pos + 1
-            elif cell == "#":
-                walls.append(pos)
-                if double_wide:
-                    walls.append(pos + 1)
+            match cell:
+                case "@":
+                    robot = pos
+                case "O":
+                    boxes.append(pos)
+                    if double_wide:
+                        boxes.append(pos + 1)
+                        box_links[pos + 1] = pos
+                        box_links[pos] = pos + 1
+                case "#":
+                    walls.append(pos)
+                    if double_wide:
+                        walls.append(pos + 1)
 
     moves = [move_map[move] for move in moves.strip() if move in move_map]
     return Warehouse(robot, boxes, walls, double_wide, box_links), moves

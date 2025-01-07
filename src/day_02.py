@@ -7,10 +7,10 @@ from utils import no_input_skip, read_input
 def check_row(row: Iterable[int]) -> bool:
     row_dir = 0
     for a, b in pairwise(row):
-        dir = (a < b) - (a > b)
-        if abs(a - b) not in (1, 2, 3) or row_dir not in (0, dir):
+        direction = (a < b) - (a > b)
+        if abs(a - b) not in (1, 2, 3) or row_dir not in (0, direction):
             return False
-        row_dir = dir
+        row_dir = direction
 
     return True
 
@@ -24,10 +24,10 @@ def part_1(puzzle: str) -> int:
 
 
 def part_2(puzzle: str) -> int:
-    ok = 0
-    for row in puzzle_to_ints(puzzle):
-        ok += check_row(row) or any(check_row(row[:i] + row[i + 1 :]) for i in range(len(row)))
-    return ok
+    return sum(
+        check_row(row) or any(check_row(row[:i] + row[i + 1 :]) for i in range(len(row)))
+        for row in puzzle_to_ints(puzzle)
+    )
 
 
 # -- Tests

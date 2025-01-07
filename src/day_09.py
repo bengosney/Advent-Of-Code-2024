@@ -10,13 +10,13 @@ Block = int | Literal["."]
 
 def parse_input(puzzle: str) -> list[Block]:
     blocks: list[Block] = []
-    id = 0
+    current_id = 0
     is_file = True
     for size in puzzle.strip():
-        value: Block = id if is_file else "."
+        value: Block = current_id if is_file else "."
         blocks.extend([value for _ in range(int(size))])
         if is_file:
-            id += 1
+            current_id += 1
         is_file = not is_file
 
     return blocks
@@ -81,14 +81,7 @@ def sort_files(blocks: list[Block]) -> list[Block]:
 
 
 def checksum(blocks: list[Block]) -> int:
-    value = 0
-    for position, id in enumerate(blocks):
-        if id == ".":
-            continue
-
-        value += position * int(id)
-
-    return value
+    return sum(position * int(id) for position, id in enumerate(blocks) if id != ".")
 
 
 def part_1(puzzle: str) -> int:

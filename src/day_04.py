@@ -25,7 +25,7 @@ def part_1(puzzle: str) -> int:
 
     directions = [(1, 0), (0, 1), (1, 1), (1, -1)]
 
-    for x, y in [k for k in grid.keys()]:
+    for x, y in list(grid.keys()):
         for dx, dy in directions:
             if [grid[(x + i * dx, y + i * dy)] for i in range(WORD_LENGTH)] in to_check:
                 found += 1
@@ -46,7 +46,7 @@ def part_2(puzzle: str) -> int:
         ["M", "M", "A", "S", "S"],
     ]
 
-    for x, y in [k for k in grid.keys()]:
+    for x, y in list(grid.keys()):
         selected = [
             grid[(x, y)],
             grid[(x + 2, y)],

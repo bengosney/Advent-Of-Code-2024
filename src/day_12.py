@@ -45,10 +45,7 @@ def get_edges(patch: set[complex], debug=False) -> int:
 
     def walk_dir(start: complex, direction: complex, other: complex, checked: set) -> None:
         current = start
-        while True:
-            if (current + other) not in patch or current in patch:
-                break
-
+        while (current + other) in patch and current not in patch:
             checked.add(current)
             current += direction
 
@@ -72,7 +69,7 @@ def cost_fencing(garden: dict[complex, str], method: Callable[[set[complex]], in
         if pos in visited:
             continue
 
-        patch = set([pos])
+        patch = {pos}
         to_check = deque([pos])
         while to_check:
             current = to_check.popleft()
