@@ -5,23 +5,23 @@ from utils import no_input_skip, read_input
 
 
 def parse_input(puzzle: str) -> tuple[dict[str, set[complex]], complex]:
-    map: dict[str, set[complex]] = defaultdict(set)
+    puzzle_map: dict[str, set[complex]] = defaultdict(set)
     for y, line in enumerate(puzzle.splitlines()):
         for x, cell in enumerate(line):
             if cell != ".":
-                map[cell].add(complex(x, y))
+                puzzle_map[cell].add(complex(x, y))
 
-    return map, complex(x, y)
+    return puzzle_map, complex(x, y)
 
 
 def part_1(puzzle: str) -> int:
-    map, extents = parse_input(puzzle)
+    puzzle_map, extents = parse_input(puzzle)
     antinodes: set[complex] = set()
 
     def in_bounds(a: complex) -> bool:
         return 0 <= a.real <= extents.real and 0 <= a.imag <= extents.imag
 
-    for positions in map.values():
+    for positions in puzzle_map.values():
         for a, b in combinations(positions, 2):
             dist = a - b
             antinodes.add(a + dist)
@@ -31,7 +31,7 @@ def part_1(puzzle: str) -> int:
 
 
 def part_2(puzzle: str) -> int:
-    map, extents = parse_input(puzzle)
+    puzzle_map, extents = parse_input(puzzle)
     antinodes: set[complex] = set()
 
     def in_bounds(a: complex) -> bool:
@@ -43,7 +43,7 @@ def part_2(puzzle: str) -> int:
             antinodes.add(node)
             node += dist
 
-    for positions in map.values():
+    for positions in puzzle_map.values():
         for a, b in combinations(positions, 2):
             calculate_nodes(a, a - b)
             calculate_nodes(b, b - a)

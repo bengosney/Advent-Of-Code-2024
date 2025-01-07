@@ -25,21 +25,13 @@ def blink(stone: int, itterations: int) -> int:
 def part_1(puzzle: str) -> int:
     stones = parse_input(puzzle)
 
-    total = 0
-    for stone in stones:
-        total += blink(stone, 25)
-
-    return total
+    return sum(blink(stone, 25) for stone in stones)
 
 
 def part_2(puzzle: str) -> int:
     stones = parse_input(puzzle)
 
-    total = 0
-    for stone in stones:
-        total += blink(stone, 75)
-
-    return total
+    return sum(blink(stone, 75) for stone in stones)
 
 
 # -- Tests

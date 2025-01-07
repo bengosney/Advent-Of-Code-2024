@@ -23,10 +23,8 @@ class Game:
 
         a_miss = self.a.real * a + self.b.real * b != prize.real
         b_miss = self.a.imag * a + self.b.imag * b != prize.imag
-        if a_miss or b_miss:
-            return 0
 
-        return int(3 * a + b)
+        return 0 if a_miss or b_miss else int(3 * a + b)
 
 
 def parse_line(line: str) -> complex:
@@ -48,21 +46,13 @@ def parse_input(puzzle: str) -> list[Game]:
 def part_1(puzzle: str) -> int:
     games = parse_input(puzzle)
 
-    cost = 0
-    for game in games:
-        cost += game.cost()
-
-    return cost
+    return sum(game.cost() for game in games)
 
 
 def part_2(puzzle: str) -> int:
     games = parse_input(puzzle)
 
-    cost = 0
-    for game in games:
-        cost += game.cost(10_000_000_000_000)
-
-    return cost
+    return sum(game.cost(10_000_000_000_000) for game in games)
 
 
 # -- Tests

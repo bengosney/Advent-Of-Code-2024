@@ -15,7 +15,7 @@ def walk_path(bytes: list[complex], size: int) -> set[complex]:
     visited: set[complex] = set()
     queue: list[tuple[int, int, int, set[complex]]] = []
 
-    heappush(queue, (0, 0, 0, set([complex(0, 0)])))
+    heappush(queue, (0, 0, 0, {complex(0, 0)}))
     while queue:
         dist, x, y, history = heappop(queue)
         pos = complex(x, y)
