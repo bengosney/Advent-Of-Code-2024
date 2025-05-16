@@ -13,6 +13,6 @@ def no_input_skip(f: Callable[..., Any]) -> Callable[..., Any]:
         try:
             return f(*args, **kwargs)
         except FileNotFoundError:
-            pytest.skip("Input file not found")
+            pytest.skip("Input file not found")  # ty: ignore[call-non-callable]
 
     return wrapper
