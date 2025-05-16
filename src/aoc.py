@@ -134,10 +134,10 @@ def run_day(day: str, progress: Callable[..., Any] = lambda: None) -> tuple[floa
     part_1 = 0
     part_2 = 0
     with contextlib.suppress(Exception):
-        part_1 = module.part_1(input_str)
+        part_1 = module.part_1(input_str)  # type: ignore[unresolved-attribute]
         progress()
 
-        part_2 = module.part_2(input_str)
+        part_2 = module.part_2(input_str)  # type: ignore[unresolved-attribute]
         progress()
 
     return part_1, part_2

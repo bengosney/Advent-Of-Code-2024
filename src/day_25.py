@@ -7,12 +7,12 @@ Key = list[int]
 
 
 def parse_input(puzzle: str) -> tuple[list[Key], list[Lock]]:
-    keys = []
-    locks = []
+    keys: list[Key] = []
+    locks: list[Lock] = []
 
     for data in puzzle.split("\n\n"):
-        lines = data.splitlines()
-        item = [sum(int(lines[j][i] == "#") for j in range(len(lines))) - 1 for i in range(len(lines[0]))]
+        lines: list[str] = data.splitlines()
+        item: Key = [sum(int(lines[j][i] == "#") for j in range(len(lines))) - 1 for i in range(len(lines[0]))]
         if data.startswith("#"):
             keys.append(item)
         else:
@@ -40,7 +40,7 @@ def part_1(puzzle: str) -> int:
     return count
 
 
-def part_2(puzzle: str) -> int:
+def part_2(puzzle: str) -> None:
     pass
 
 

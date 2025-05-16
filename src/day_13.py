@@ -35,10 +35,10 @@ def parse_line(line: str) -> complex:
 
 
 def parse_input(puzzle: str) -> list[Game]:
-    games = []
+    games: list[Game] = []
     for parts in puzzle.split("\n\n"):
         lines = map(parse_line, parts.splitlines())
-        games.append(Game(*lines))
+        games.append(Game(*lines))  # type: ignore[missing-argument]
 
     return games
 
